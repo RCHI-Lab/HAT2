@@ -2,8 +2,9 @@ import os
 import time
 
 import rospy
+import tf2_ros
 from visualization_msgs.msg import Marker
-from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
+from geometry_msgs.msg import Quaternion, Pose, Point, Vector3, TransformStamped, Transform
 from std_msgs.msg import Header, ColorRGBA
 
 
@@ -15,10 +16,12 @@ class GzMarker:
         self.z = z
         self.scale = scale
         self.id = id
+        # gazebo marker
         msg = f"action: ADD_MODIFY, type: SPHERE, id: {self.id}, "
         msg += f"scale: {{x:{self.scale}, y:{self.scale}, z:{self.scale}}}, "
         msg += f"pose: {{position: {{x:{self.x}, y:{self.y}, z:{self.z}}}, orientation: {{x:0, y:0, z:0, w:1}}}}"
         os.system("gz marker -m '" + msg + "'")
+        # rviz marker
         marker = Marker(
             type=Marker.SPHERE,
             id=self.id,
@@ -29,6 +32,18 @@ class GzMarker:
             color=ColorRGBA(1.0, 1.0, 1.0, 0.8),
         )
         self.pub.publish(marker)
+        # tf broadcast
+        self.br = tf2_ros.StaticTransformBroadcaster()
+        tf_stamped = TransformStamped(
+            header=Header(stamp=rospy.Time.now(), frame_id="odom"),
+            child_frame_id="ee_goal",
+            transform=Transform(
+                translation=Vector3(self.x, self.y, self.z),
+                rotation=Quaternion(0,0,0,1)
+            )
+        )
+        self.br.sendTransform(tf_stamped)
+
 
     def __del__(self) -> None:
         os.system(f"gz marker -m 'action: DELETE_MARKER, id: {self.id}'")
@@ -39,5 +54,13 @@ class GzMarker:
 rospy.init_node("rviz_marker")
 marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
 marker = GzMarker(marker_pub, 1, 1, 1)
-time.sleep(10)
-del marker
+
+rospy.on_shutdown(marker.__del__)
+
+rate = rospy.Rate(1)
+
+try:
+    while not rospy.is_shutdown():
+        rate.sleep()
+except rospy.ROSInterruptException:
+    pass
