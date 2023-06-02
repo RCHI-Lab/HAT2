@@ -25,21 +25,19 @@ else:
 TwistMsg = Twist
 
 msg = """
-Reading from the keyboard  and Publishing to Twist!
+Reading from the keyboard and Publishing to Twist and joint velocity!
 ---------------------------
 Moving around:
-   u    i    o
-   j    k    l
-   m    ,    .
+       w
+    a  s  d
 
-For Holonomic mode (strafing), hold down the shift key:
----------------------------
-   U    I    O
-   J    K    L
-   M    <    >
+Moving arm:
+       i
+    j  k  l
 
-t : up (+z)
-b : down (-z)
+Moving gripper:
+    u     o
+
 
 anything else : stop
 
@@ -59,14 +57,6 @@ moveBindings = {
         ',':(-1,0,0,0),
         '.':(-1,0,0,1),
         'm':(-1,0,0,-1),
-        'O':(1,-1,0,0),
-        'I':(1,0,0,0),
-        'J':(0,1,0,0),
-        'L':(0,-1,0,0),
-        'U':(1,1,0,0),
-        '<':(-1,0,0,0),
-        '>':(-1,-1,0,0),
-        'M':(-1,1,0,0),
         't':(0,0,1,0),
         'b':(0,0,-1,0),
     }
@@ -83,7 +73,7 @@ speedBindings={
 class PublishThread(threading.Thread):
     def __init__(self, rate):
         super(PublishThread, self).__init__()
-        self.publisher = rospy.Publisher('cmd_vel', TwistMsg, queue_size = 1)
+        self.publisher = rospy.Publisher('/stretch_diff_drive_controller/cmd_vel', TwistMsg, queue_size = 1)
         self.x = 0.0
         self.y = 0.0
         self.z = 0.0
@@ -113,7 +103,7 @@ class PublishThread(threading.Thread):
         if rospy.is_shutdown():
             raise Exception("Got shutdown request before subscribers connected")
 
-    def update(self, x, y, z, th, speed, turn):
+    def update(self, x, y, z, th, speed, turn, lift, arm_ext, wrist):
         self.condition.acquire()
         self.x = x
         self.y = y
@@ -121,6 +111,9 @@ class PublishThread(threading.Thread):
         self.th = th
         self.speed = speed
         self.turn = turn
+        self.lift = lift
+        self.arm_ext = arm_ext
+        self.wrist = wrist
         # Notify publish thread that we have a new message.
         self.condition.notify()
         self.condition.release()
@@ -219,11 +212,14 @@ if __name__=="__main__":
     y = 0
     z = 0
     th = 0
+    lift = 0
+    arm_ext = 0
+    wrist = 0
     status = 0
 
     try:
         pub_thread.wait_for_subscribers()
-        pub_thread.update(x, y, z, th, speed, turn)
+        pub_thread.update(x, y, z, th, speed, turn, lift, arm_ext, wrist)
 
         print(msg)
         print(vels(speed,turn))
@@ -257,7 +253,7 @@ if __name__=="__main__":
                 if (key == '\x03'):
                     break
 
-            pub_thread.update(x, y, z, th, speed, turn)
+            pub_thread.update(x, y, z, th, speed, turn, lift, arm_ext, wrist)
 
     except Exception as e:
         print(e)
