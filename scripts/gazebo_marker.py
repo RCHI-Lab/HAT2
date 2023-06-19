@@ -51,17 +51,17 @@ class GzMarker:
         marker = Marker(action=Marker.DELETE, id=self.id)
         self.pub.publish(marker)
 
+if __name__ == "__main__":
+    rospy.init_node("gazebo_marker")
+    marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
+    marker = GzMarker(marker_pub, 1, 1, 1)
 
-rospy.init_node("rviz_marker")
-marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
-marker = GzMarker(marker_pub, 1, 1, 1)
+    rospy.on_shutdown(marker.__del__)
 
-rospy.on_shutdown(marker.__del__)
+    rate = rospy.Rate(1)
 
-rate = rospy.Rate(1)
-
-try:
-    while not rospy.is_shutdown():
-        rate.sleep()
-except rospy.ROSInterruptException:
-    pass
+    try:
+        while not rospy.is_shutdown():
+            rate.sleep()
+    except rospy.ROSInterruptException:
+        pass
