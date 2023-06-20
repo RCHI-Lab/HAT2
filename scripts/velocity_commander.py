@@ -29,6 +29,9 @@ class VelocityCommander:
             self.base_vel_pub.publish(base_stop_msg)
             r.sleep()
 
+    def get_num_connections(self):
+        return min(self.arm_vel_pub.get_num_connections(), self.base_vel_pub.get_num_connections())
+
 
 if __name__ == "__main__":
     rospy.init_node("velocity_commander")
