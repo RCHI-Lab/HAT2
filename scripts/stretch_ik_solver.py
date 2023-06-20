@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
+import os.path
+
 import kdl_parser_py.urdf
 import numpy as np
 import PyKDL as kdl
 import rospkg
-import os.path
 
 
 class IKSolver:
-    def __init__(
-        self,
-        urdf_path=None,
-        verbose=False
-    ) -> None:
+    def __init__(self, urdf_path=None, verbose=False) -> None:
         rospack = rospkg.RosPack()
         # the urdf is generated in my macbook using the original jupyter notebook
         _urdf_path = (
@@ -25,7 +22,7 @@ class IKSolver:
         self.joint_num = self.__chain.getNrOfJoints()
         self.verbose = verbose
 
-    def J_kdl_to_np(self, J, fixed_joints=()) -> np.ndarray:
+    def _J_kdl_to_np(self, J, fixed_joints=()) -> np.ndarray:
         return np.array(
             [
                 [J[i, j] if j not in fixed_joints else 0 for j in range(J.columns())]
@@ -41,10 +38,10 @@ class IKSolver:
         for i, j in enumerate(q):
             q_kdl[i] = j
         J_kdl = kdl.Jacobian(self.joint_num)
-        self.__jac_solver.JntToJac(q, J_kdl)
+        self.__jac_solver.JntToJac(q_kdl, J_kdl)
         if self.verbose:
             print(J_kdl)
-        J = self.J_kdl_to_np(J_kdl, fixed_joints=fixed_joints)
+        J = self._J_kdl_to_np(J_kdl, fixed_joints=fixed_joints)
         J_pinv = np.linalg.pinv(J)
         if self.verbose:
             with np.printoptions(precision=4, suppress=True, linewidth=100):
@@ -52,6 +49,8 @@ class IKSolver:
                 print(J_pinv)
         return J_pinv
 
+
 if __name__ == "__main__":
     ik_solver = IKSolver(verbose=True)
-    ik_solver.__jac_solver
+    q = [0] * 8
+    ik_solver.solve_J_pinv(q, fixed_joints=(3,))
