@@ -6,19 +6,6 @@
       <mass value="0.101902711393094"/>
       <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
     </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_gripper.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_gripper.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
   </link>
   <link name="link_grasp_center">
     <inertial>
@@ -33,19 +20,6 @@
       <mass value="1.1912"/>
       <inertia ixx="0.0034667" ixy="-5.0568e-06" ixz="0.00042861" iyy="0.0052744" iyz="-5.766e-05" izz="0.0047945"/>
     </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/base_link.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/base_link.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
   </link>
   <link name="link_mast">
     <inertial>
@@ -53,19 +27,6 @@
       <mass value="1.8285"/>
       <inertia ixx="0.0709854511954588" ixy="-0.00433428742758457" ixz="-0.000186110788697573" iyy="0.000437922053342648" iyz="-0.00288788257713431" izz="0.071104808501661"/>
     </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_mast.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_mast.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
   </link>
   <link name="link_lift">
     <inertial>
@@ -73,19 +34,6 @@
       <mass value="0.27218"/>
       <inertia ixx="0.00052571" ixy="0.00014899" ixz="-1.9258e-05" iyy="0.00030679" iyz="-6.2451e-06" izz="0.00037324"/>
     </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_lift.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_lift.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
   </link>
   <link name="link_arm_l4">
     <inertial>
@@ -93,19 +41,6 @@
       <mass value="0.068095"/>
       <inertia ixx="0.0001256" ixy="-5.6914e-12" ixz="6.0647e-09" iyy="0.0001256" iyz="1.1787e-07" izz="1.1091e-10"/>
     </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_arm_l4.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_arm_l4.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
   </link>
   <link name="link_arm_l3">
     <inertial>
@@ -113,19 +48,6 @@
       <mass value="0.0628927381893134"/>
       <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
     </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_arm_l3.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_arm_l3.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
   </link>
   <link name="link_arm_l2">
     <inertial>
@@ -133,19 +55,6 @@
       <mass value="0.0571386353275368"/>
       <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
     </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_arm_l2.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_arm_l2.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
   </link>
   <link name="link_arm_l1">
     <inertial>
@@ -153,19 +62,6 @@
       <mass value="0.051382"/>
       <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
     </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_arm_l1.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_arm_l1.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
   </link>
   <link name="link_arm_l0">
     <inertial>
@@ -173,19 +69,6 @@
       <mass value="0.085003260946398"/>
       <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
     </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_arm_l0.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_arm_l0.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
   </link>
   <link name="link_wrist_yaw">
     <inertial>
@@ -193,61 +76,15 @@
       <mass value="0.0404746907425003"/>
       <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
     </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_wrist_yaw.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_wrist_yaw.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
-  </link>
-  <link name="link_head_teleop_mount">
-    <inertial>
-      <origin xyz="0.032675 0.036403 -0.0035184" rpy="0.0 0.0 0.0"/>
-      <mass value="0.072645"/>
-      <inertia ixx="9.371e-05" ixy="-3.7238e-05" ixz="1.2184e-05" iyy="2.7972e-05" iyz="2.6994e-05" izz="9.9358e-05"/>
-    </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_head_teleop_mount.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_head_teleop_mount.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
-  </link>
-  <link name="link_head_teleop_camera">
-    <inertial>
-      <origin xyz="0.0040022 5.9321e-05 -0.00011952" rpy="0.0 0.0 0.0"/>
-      <mass value="0.0056257"/>
-      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
-    </inertial>
-    <visual name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_head_teleop_camera.STL"/>
-      </geometry>
-      <material name=""/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </visual>
-    <collision name="None">
-      <geometry>
-        <mesh filename="../meshes/../meshes/link_head_teleop_camera.STL"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-    </collision>
   </link>
   <link name="link_base_translation">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+      <mass value="1.0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+  <link name="link_base_revolution">
     <inertial>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
       <mass value="1.0"/>
@@ -267,7 +104,7 @@
     <origin xyz="-0.205478 0.0 -0.138154" rpy="0.0 0.0 3.141579"/>
   </joint>
   <joint name="joint_mast" type="fixed">
-    <parent link="link_base_translation"/>
+    <parent link="link_base_revolution"/>
     <child link="link_mast"/>
     <axis xyz="1. 0. 0."/>
     <origin xyz="-0.067 0.135 0.0284" rpy="1.5708 0.0 4.8006e-17"/>
@@ -320,23 +157,18 @@
     <axis xyz=" 0.  0. -1."/>
     <origin xyz="0.0830000000000654 -0.0307500000000129 0.0" rpy="1.5708 4.2595e-14 2.6415e-15"/>
   </joint>
-  <joint name="joint_head_teleop_mount" type="fixed">
-    <parent link="link_head"/>
-    <child link="link_head_teleop_mount"/>
-    <axis xyz="1. 0. 0."/>
-    <origin xyz="0.079 0.0731 0.052" rpy="0.0 0.0 0.0"/>
-  </joint>
-  <joint name="joint_head_teleop_camera" type="fixed">
-    <parent link="link_head_teleop_mount"/>
-    <child link="link_head_teleop_camera"/>
-    <axis xyz="1. 0. 0."/>
-    <origin xyz="0.055997 0.088091 -0.0245" rpy="-1.5707963267948966 1.5707963267948966 0.0"/>
-  </joint>
   <joint name="joint_base_translation" type="prismatic">
-    <limit effort="100.0" velocity="1.0" lower="-1.0" upper="1.0"/>
+    <limit effort="100.0" velocity="1.0" lower="-3.0" upper="3.0"/>
     <parent link="base_link"/>
     <child link="link_base_translation"/>
     <axis xyz="1. 0. 0."/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+  </joint>
+  <joint name="joint_base_revolution" type="revolute">
+    <limit effort="100.0" velocity="1.0" lower="-3.0" upper="3.0"/>
+    <parent link="link_base_translation"/>
+    <child link="link_base_revolution"/>
+    <axis xyz="0. 0. 1."/>
     <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
   </joint>
   <material name="aluminum">
