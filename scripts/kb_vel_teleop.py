@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# https://github.com/ros-teleop/teleop_twist_keyboard/blob/master/teleop_twist_keyboard.py
+# modified from https://github.com/ros-teleop/teleop_twist_keyboard/blob/master/teleop_twist_keyboard.py
 
 from __future__ import print_function
 
@@ -25,7 +25,6 @@ else:
 TwistMsg = Twist
 
 msg = """
-Reading from the keyboard and Publishing to Twist and joint velocity!
 ---------------------------
 Moving around:
        w
@@ -35,15 +34,14 @@ Moving arm:
        i
     j  k  l
 
-Moving gripper:
+Turning gripper:
     u     o
 
 
 anything else : stop
 
-q/z : increase/decrease max speeds by 10%
-w/x : increase/decrease only linear speed by 10%
-e/c : increase/decrease only angular speed by 10%
+z/x : increase/decrease only linear speed by 10%
+c/v : increase/decrease only angular speed by 10%
 
 CTRL-C to quit
 """

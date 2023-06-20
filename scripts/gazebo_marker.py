@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 import os
-import time
 
 import rospy
 import tf2_ros
+from geometry_msgs.msg import Point, Pose, Quaternion, Transform, TransformStamped, Vector3
+from std_msgs.msg import ColorRGBA, Header
 from visualization_msgs.msg import Marker
-from geometry_msgs.msg import Quaternion, Pose, Point, Vector3, TransformStamped, Transform
-from std_msgs.msg import Header, ColorRGBA
 
 
 class GzMarker:
@@ -39,17 +38,16 @@ class GzMarker:
             header=Header(stamp=rospy.Time.now(), frame_id="odom"),
             child_frame_id="ee_goal",
             transform=Transform(
-                translation=Vector3(self.x, self.y, self.z),
-                rotation=Quaternion(0,0,0,1)
-            )
+                translation=Vector3(self.x, self.y, self.z), rotation=Quaternion(0, 0, 0, 1)
+            ),
         )
         self.br.sendTransform(tf_stamped)
-
 
     def __del__(self) -> None:
         os.system(f"gz marker -m 'action: DELETE_MARKER, id: {self.id}'")
         marker = Marker(action=Marker.DELETE, id=self.id)
         self.pub.publish(marker)
+
 
 if __name__ == "__main__":
     rospy.init_node("gazebo_marker")
