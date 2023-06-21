@@ -8,7 +8,7 @@ import rospkg
 
 
 class IKSolver:
-    def __init__(self, urdf_path=None, verbose=False) -> None:
+    def __init__(self, urdf_path=None, verbose=False, only_trans=False) -> None:
         rospack = rospkg.RosPack()
         # the urdf is generated in my macbook using the original jupyter notebook
         _urdf_path = (
@@ -21,12 +21,13 @@ class IKSolver:
         self.__jac_solver = kdl.ChainJntToJacSolver(self.__chain)
         self.joint_num = self.__chain.getNrOfJoints()
         self.verbose = verbose
+        self.only_trans = only_trans
 
     def _J_kdl_to_np(self, J, fixed_joints=()) -> np.ndarray:
         return np.array(
             [
                 [J[i, j] if j not in fixed_joints else 0 for j in range(J.columns())]
-                for i in range(J.rows())
+                for i in (range(3) if self.only_trans else range(J.rows()))
             ]
         )
 
