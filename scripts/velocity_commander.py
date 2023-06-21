@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from typing import Sequence
+
 import rospy
 from geometry_msgs.msg import Twist, Vector3
 from std_msgs.msg import Float64MultiArray
@@ -14,10 +16,10 @@ class VelocityCommander:
             "/stretch_diff_drive_controller/cmd_vel", Twist, queue_size=1
         )
 
-    def pub_vel(self, qdot):
-        arm_msg = Float64MultiArray(data=qdot[2:])
+    def pub_vel(self, q_dot: Sequence[float]):
+        arm_msg = Float64MultiArray(data=q_dot[2:])
         self.arm_vel_pub.publish(arm_msg)
-        base_msg = Twist(linear=Vector3(qdot[0], 0, 0), angular=Vector3(0, 0, qdot[1]))
+        base_msg = Twist(linear=Vector3(q_dot[0], 0, 0), angular=Vector3(0, 0, q_dot[1]))
         self.base_vel_pub.publish(base_msg)
 
     def stop(self):

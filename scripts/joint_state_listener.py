@@ -14,7 +14,8 @@ class JointStateListener:
         self.msg = joint_states
 
     # publish rate is 50Hz in gazebo
-    def get_latest_pos(self) -> tuple[rospy.Duration, tuple]:
+    def get_state(self) -> tuple[rospy.Duration, tuple]:
+        """get latest joint state"""
         if self.msg is None:
             raise ValueError("No joint state received yet")
         duration: rospy.Duration = rospy.get_rostime() - self.msg.header.stamp
@@ -39,7 +40,7 @@ if __name__ == "__main__":
     listener = JointStateListener()
     while not rospy.is_shutdown():
         try:
-            duration, q = listener.get_latest_pos()
+            duration, q = listener.get_state()
             rospy.loginfo_throttle(1, f"{q}, {duration.to_sec()}s ago")
         except ValueError as e:
             rospy.loginfo_throttle(1, e)
