@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+"""
+Automatically publish goal marker in gazebo, rviz and tf server
+author: Chen Chen
+"""
+
 import os
 
 import rospy
@@ -25,7 +31,6 @@ class GzMarker:
         marker = Marker(
             type=Marker.SPHERE,
             id=self.id,
-            lifetime=rospy.Duration(15),
             pose=Pose(Point(self.x, self.y, self.z), Quaternion(0, 0, 0, 1)),
             scale=Vector3(*(self.scale,) * 3),
             header=Header(frame_id="odom"),
@@ -52,7 +57,7 @@ class GzMarker:
 if __name__ == "__main__":
     rospy.init_node("gazebo_marker")
     marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
-    marker = GzMarker(marker_pub, 1, 1, 1)
+    marker = GzMarker(marker_pub, 0, 0, 0.5)
 
     rospy.on_shutdown(marker.__del__)
 

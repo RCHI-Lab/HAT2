@@ -13,9 +13,7 @@ from velocity_commander import VelocityCommander
 
 class ControllerBase(abc.ABC):
     def __init__(self, uh_topic, verbose=False) -> None:
-        if uh_topic is None:
-            del self.uh_cb
-        else:
+        if uh_topic is not None:
             rospy.Subscriber(uh_topic, Float64MultiArray, self.uh_cb)
             self.uh = np.zeros(8)
         self._tf_buffer = tf2_ros.Buffer()
@@ -33,13 +31,20 @@ class ControllerBase(abc.ABC):
     def step(self):
         pass
 
-    def get_err(self, target_frame="ee_goal"):
+    # TODO refactor, function to get both target and ee position
+    def get_err(self, target_frame="ee_goal", base_frame="base_link"):
         try:
-            transfrom: TransformStamped = self._tf_buffer.lookup_transform(
-                target_frame, "link_grasp_center", rospy.Time()
+            target_transform: TransformStamped = self._tf_buffer.lookup_transform(
+                base_frame, target_frame, rospy.Time()
             )
-            translation = transfrom.transform.translation
-            return np.array([translation.x, translation.y, translation.z])
+            target_pos = target_transform.transform.translation
+            ee_transform: TransformStamped = self._tf_buffer.lookup_transform(
+                base_frame, "link_grasp_center", rospy.Time()
+            )
+            ee_pos = ee_transform.transform.translation
+            return np.array(
+                [target_pos.x - ee_pos.x, target_pos.y - ee_pos.y, target_pos.z - ee_pos.z, 0, 0, 0]
+            )
         except (
             tf2_ros.LookupException,
             tf2_ros.ConnectivityException,

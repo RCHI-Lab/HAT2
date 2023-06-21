@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+Controller which directly pass the velocity provided by interface to stretch
+author: Chen Chen
+"""
+
 from __future__ import annotations
 
 import rospy
