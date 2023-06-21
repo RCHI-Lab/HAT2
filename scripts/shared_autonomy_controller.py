@@ -12,7 +12,7 @@ from velocity_commander import VelocityCommander
 
 
 class ControllerBase(abc.ABC):
-    def __init__(self, uh_topic) -> None:
+    def __init__(self, uh_topic, verbose=False) -> None:
         if uh_topic is None:
             del self.uh_cb
         else:
@@ -21,10 +21,13 @@ class ControllerBase(abc.ABC):
         self._tf_buffer = tf2_ros.Buffer()
         self._tf_listener = tf2_ros.TransformListener(self._tf_buffer)
         self._vel_cmder = VelocityCommander()
+        self.verbose = verbose
 
     def uh_cb(self, data: Float64MultiArray) -> None:
         """human input callback function"""
         self.uh = np.array(data.data)
+        if self.verbose:
+            rospy.loginfo(f"received: {self.uh}")
 
     @abc.abstractmethod
     def step(self):

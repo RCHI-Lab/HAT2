@@ -14,6 +14,7 @@ import sys
 from select import select
 
 import rospy
+from std_msgs.msg import Float64MultiArray
 from velocity_commander import VelocityCommander
 
 if sys.platform == "win32":
@@ -68,7 +69,9 @@ speedBindings = {
 class PublishThread(threading.Thread):
     def __init__(self, rate):
         super(PublishThread, self).__init__()
-        self.publisher = VelocityCommander()
+        self.publisher = rospy.Publisher(
+            "/teleop_velocity_command", Float64MultiArray, queue_size=1
+        )
         self.x = 0.0
         self.th = 0.0
         self.lift = 0.0
@@ -133,10 +136,12 @@ class PublishThread(threading.Thread):
             self.condition.release()
 
             # Publish.
-            self.publisher.pub_vel([x, th, lift, *[single_arm_ext] * 4, wrist])
+            self.publisher.publish(
+                Float64MultiArray(data=[x, th, lift, *[single_arm_ext] * 4, wrist])
+            )
 
         # Publish stop message when thread exits.
-        self.publisher.stop()
+        self.publisher.publish(Float64MultiArray(data=[0] * 8))
 
 
 def getKey(settings, timeout):
