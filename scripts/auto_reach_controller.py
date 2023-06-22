@@ -3,7 +3,7 @@
 import numpy as np
 import rospy
 from joint_state_listener import JointStateListener
-from shared_autonomy_controller import ControllerBase
+from controller_base import ControllerBase
 from stretch_ik_solver import IKSolver
 from typing_extensions import override
 

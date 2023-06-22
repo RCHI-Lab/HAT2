@@ -8,7 +8,7 @@ author: Chen Chen
 from __future__ import annotations
 
 import rospy
-from shared_autonomy_controller import ControllerBase
+from controller_base import ControllerBase
 from typing_extensions import override
 
 
