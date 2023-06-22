@@ -1,0 +1,4 @@
+<launch>
+    <node name="auto_reach_controller" pkg="stretch_shared_autonomy" type="auto_reach_controller.py" />
+    <node name="goal_manager" pkg="stretch_shared_autonomy" type="goal_manager.py" />
+</launch>

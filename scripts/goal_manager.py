@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
+
 import random
 from math import sqrt
 
@@ -11,9 +13,11 @@ from tf2_ros import Buffer
 from visualization_msgs.msg import Marker
 
 
-def dist_between_tfs(buffer: Buffer, tf1: str, tf2: str):
+def dist_between_tfs(buffer: Buffer, tf1: str, tf2: str) -> float | None:
     try:
-        target_transform: TransformStamped = buffer.lookup_transform(tf1, tf2, rospy.Time())
+        target_transform: TransformStamped = buffer.lookup_transform(
+            tf1, tf2, rospy.Time(), timeout=rospy.Duration(secs=5)
+        )
         pos = target_transform.transform.translation
         return sqrt(pos.x**2 + pos.y**2 + pos.z**2)
     except (
@@ -25,23 +29,15 @@ def dist_between_tfs(buffer: Buffer, tf1: str, tf2: str):
         return None
 
 
-def get_new_marker_pose(buffer, range=0.4):
-    try:
-        target_transform: TransformStamped = buffer.lookup_transform(
-            "odom", "base_link", rospy.Time()
-        )
-        pos = target_transform.transform.translation
-        x = random.choice((-1, 1)) * random.uniform(0.2, range)
-        y = random.choice((-1, 1)) * random.uniform(0.2, range)
-        z = random.uniform(0.1, 1)
-        return (x + pos.x, y + pos.y, z + pos.z)
-    except (
-        tf2_ros.LookupException,
-        tf2_ros.ConnectivityException,
-        tf2_ros.ExtrapolationException,
-    ) as e:
-        rospy.logerr(e)
-        return None
+def get_new_marker_pose(buffer: tf2_ros.Buffer, range=0.4) -> tuple:
+    target_transform: TransformStamped = buffer.lookup_transform(
+        "odom", "base_link", rospy.Time(), timeout=rospy.Duration(secs=5)
+    )
+    pos = target_transform.transform.translation
+    x = random.choice((-1, 1)) * random.uniform(0.2, range)
+    y = random.choice((-1, 1)) * random.uniform(0.2, range)
+    z = random.uniform(0.1, 1)
+    return (x + pos.x, y + pos.y, z + pos.z)
 
 
 if __name__ == "__main__":
@@ -49,8 +45,6 @@ if __name__ == "__main__":
     marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
     tf_buffer = tf2_ros.Buffer()
     tf_listener = tf2_ros.TransformListener(tf_buffer)
-    rospy.sleep(1)
-    # marker = GazeboMarker(marker_pub, 1, 1, 1)
     marker_list = [
         GazeboMarker(marker_pub, *get_new_marker_pose(tf_buffer)),
     ]

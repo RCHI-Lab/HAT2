@@ -31,6 +31,9 @@ if __name__ == "__main__":
     r = rospy.Rate(30)
     rospy.sleep(0.5)
 
-    while not rospy.is_shutdown():
-        ctrler.step()
-        r.sleep()
+    try:
+        while not rospy.is_shutdown():
+            ctrler.step()
+            r.sleep()
+    except rospy.ROSInterruptException:
+        pass
