@@ -19,6 +19,11 @@ class IKSolver:
         ok, tree = kdl_parser_py.urdf.treeFromFile(_urdf_path)
         self.__chain = tree.getChain("base_link", "link_grasp_center")
         self.__jac_solver = kdl.ChainJntToJacSolver(self.__chain)
+        self.__fk_solver = kdl.ChainFkSolverPos_recursive(self.__chain)
+        self.__ik_vel_solver = kdl.ChainIkSolverVel_pinv(self.__chain)
+        self.__ik_solver = kdl.ChainIkSolverPos_NR(
+            self.__chain, self.__fk_solver, self.__ik_vel_solver
+        )
         self.joint_num = self.__chain.getNrOfJoints()
         self.verbose = verbose
         self.only_trans = only_trans
