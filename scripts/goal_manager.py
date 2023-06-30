@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     try:
         while not rospy.is_shutdown():
-            if (dist := dist_between_tfs(tf_buffer, "ee_goal", "link_grasp_center")) is not None:
+            if (dist := dist_between_tfs(tf_buffer, "ee_goal2", "link_grasp_center")) is not None:
                 rospy.loginfo_throttle(0.5, f"distance: {dist}")
                 if dist < 0.01:
                     marker_list.clear()
