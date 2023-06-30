@@ -8,7 +8,7 @@ import rospkg
 
 
 class IKSolver:
-    def __init__(self, urdf_path=None, verbose=False, only_trans=False) -> None:
+    def __init__(self, urdf_path=None, verbose=False) -> None:
         rospack = rospkg.RosPack()
         # the urdf is generated in my macbook using the original jupyter notebook
         _urdf_path = (
@@ -26,34 +26,43 @@ class IKSolver:
         )
         self.joint_num = self.__chain.getNrOfJoints()
         self.verbose = verbose
-        self.only_trans = only_trans
 
-    def _J_kdl_to_np(self, J, fixed_joints=()) -> np.ndarray:
+    def _J_kdl_to_np(self, J, fixed_joints=(), only_trans=False) -> np.ndarray:
         return np.array(
             [
                 [J[i, j] if j not in fixed_joints else 0 for j in range(J.columns())]
-                for i in (range(3) if self.only_trans else range(J.rows()))
+                for i in (range(3) if only_trans else range(J.rows()))
             ]
         )
 
-    def solve_J_pinv(self, q, fixed_joints=()) -> np.ndarray:
+    def solve_J_pinv(self, q, fixed_joints=(), only_trans=False) -> np.ndarray:
         if len(q) != self.joint_num:
             raise ValueError(f"input q dimension is {len(q)}, expecting {self.joint_num}")
 
-        q_kdl = kdl.JntArray(self.joint_num)
-        for i, j in enumerate(q):
-            q_kdl[i] = j
+        q_kdl = self._get_q_kdl(q)
         J_kdl = kdl.Jacobian(self.joint_num)
         self.__jac_solver.JntToJac(q_kdl, J_kdl)
         if self.verbose:
             print(J_kdl)
-        J = self._J_kdl_to_np(J_kdl, fixed_joints=fixed_joints)
+        J = self._J_kdl_to_np(J_kdl, fixed_joints, only_trans)
         J_pinv = np.linalg.pinv(J)
         if self.verbose:
             with np.printoptions(precision=4, suppress=True, linewidth=100):
                 print(J)
                 print(J_pinv)
         return J_pinv
+    
+    def solve_IK(self, xd, q, fixed_joints=()):
+        if len(q) != self.joint_num:
+            raise ValueError(f"input q dimension is {len(q)}, expecting {self.joint_num}")
+        q_kdl = self._get_q_kdl(q)
+        pass
+
+    def _get_q_kdl(self, q):
+        q_kdl = kdl.JntArray(self.joint_num)
+        for i, j in enumerate(q):
+            q_kdl[i] = j
+        return q_kdl
 
 
 if __name__ == "__main__":
