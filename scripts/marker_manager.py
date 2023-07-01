@@ -7,67 +7,62 @@ from math import sqrt
 
 import rospy
 import tf2_ros
-from gazebo_marker import GazeboMarker
+from goal_marker import GoalMarker
 from geometry_msgs.msg import TransformStamped
-from tf2_ros import Buffer
 from visualization_msgs.msg import Marker
+from driver_assistance.msg import GoalBeliefArray, GoalBelief
 
 
-class GoalManager:
-    def __init__(self) -> None:
-        goals: dict[int, Marker] = {}
-        rospy.on_shutdown(goals.clear)
-        pass
+class MarkerManager:
+    def __init__(self, frame="odom") -> None:
+        self.frame = frame
+        self.pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
+        self.sub = rospy.Subscriber("/goal_visualization", GoalBeliefArray, self.goal_beliefs_cb)
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+        self.goals: dict[int, GoalMarker] = {}
+        rospy.on_shutdown(self.goals.clear)
+    
+    def goal_beliefs_cb(self, msg: GoalBeliefArray) -> None:
+        goal: GoalBelief
+        for goal in msg.goals:
+            goal_transform: TransformStamped = self.tf_buffer.lookup_transform(
+                self.frame, f"goal{goal.id}", rospy.Time()
+            )
+            goal_pos = goal_transform.transform.translation
+            self.add_update_goal(goal.id, goal_pos, goal.belief)
 
+    def add_update_goal(self, id: int, pos: tuple[float, float, float], belief: float) -> None:
+        """Add a new goal marker if it doesn't exist, otherwise update it"""
+        if id not in self.goals.keys():
+            self.add_goal(id, pos, belief)
+        self.update_goal(id, pos, belief)
+    
+    def add_goal(self, id: int, pos: tuple[float, float, float], belief: float) -> None:
+        """Add a new goal marker"""
+        if id in self.goals.keys():
+            raise ValueError(f"Goal with id {id} already exists")
+        self.goals[id] = GoalMarker(self.pub, *pos, id, self.frame, color=self.belief_color(belief))
 
-def dist_between_tfs(buffer: Buffer, tf1: str, tf2: str) -> float | None:
-    try:
-        target_transform: TransformStamped = buffer.lookup_transform(
-            tf1, tf2, rospy.Time(), timeout=rospy.Duration(secs=5)
-        )
-        pos = target_transform.transform.translation
-        return sqrt(pos.x**2 + pos.y**2 + pos.z**2)
-    except (
-        tf2_ros.LookupException,
-        tf2_ros.ConnectivityException,
-        tf2_ros.ExtrapolationException,
-    ) as e:
-        rospy.logerr(e)
-        return None
+    def update_goal(self, id: int, pos: tuple[float, float, float] | None, belief: float | None):
+        """Update the position and/or color of a goal marker"""
+        if id not in self.goals.keys():
+            raise ValueError(f"Goal with id {id} does not exist")
+        if belief is None:
+            self.goals[id].update(pos=pos)
+        else:
+            self.goals[id].update(pos=pos, color=self.belief_color(belief))
 
-
-def get_new_marker_pose(buffer: tf2_ros.Buffer, range=0.4) -> tuple:
-    target_transform: TransformStamped = buffer.lookup_transform(
-        "odom", "base_link", rospy.Time(), timeout=rospy.Duration(secs=5)
-    )
-    pos = target_transform.transform.translation
-    x = random.choice((-1, 1)) * random.uniform(0.2, range)
-    y = random.choice((-1, 1)) * random.uniform(0.2, range)
-    z = random.uniform(0.1, 1)
-    return (x + pos.x, y + pos.y, z + pos.z)
+    def belief_color(
+        self, belief: float, opacity: float = 0.8
+    ) -> tuple[float, float, float, float]:
+        if not 0 <= belief <= 1:
+            raise ValueError("Belief must be between 0 and 1")
+        return (belief, 0, 0, opacity)
 
 
 if __name__ == "__main__":
-    rospy.init_node("goal_manager")
-    marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
-    tf_buffer = tf2_ros.Buffer()
-    tf_listener = tf2_ros.TransformListener(tf_buffer)
-    marker_list = [
-        GazeboMarker(marker_pub, *get_new_marker_pose(tf_buffer)),
-    ]
+    rospy.init_node("marker_manager")
 
-    rospy.on_shutdown(marker_list.clear)
-
-    rate = rospy.Rate(5)
-
-    try:
-        while not rospy.is_shutdown():
-            if (dist := dist_between_tfs(tf_buffer, "ee_goal2", "link_grasp_center")) is not None:
-                rospy.loginfo_throttle(0.5, f"distance: {dist}")
-                if dist < 0.01:
-                    marker_list.clear()
-                    marker_list.append(GazeboMarker(marker_pub, *get_new_marker_pose(tf_buffer)))
-                    rospy.sleep(0.5)
-            rate.sleep()
-    except rospy.ROSInterruptException:
-        pass
+    manager = MarkerManager()
+    rospy.spin()
