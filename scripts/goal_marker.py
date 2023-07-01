@@ -16,7 +16,7 @@ from std_msgs.msg import ColorRGBA, Header
 from visualization_msgs.msg import Marker
 
 
-class GazeboMarker:
+class GoalMarker:
     def __init__(
         self,
         pub: rospy.Publisher,
@@ -105,7 +105,7 @@ class GazeboMarker:
 if __name__ == "__main__":
     rospy.init_node("gazebo_marker")
     marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
-    marker = GazeboMarker(marker_pub, *(1, 1, 1), id=1, frame="odom")
+    marker = GoalMarker(marker_pub, *(1, 1, 1), id=1, frame="odom")
     rospy.on_shutdown(marker.__del__)
 
     rospy.sleep(1)

@@ -12,7 +12,7 @@ class IKSolver:
         rospack = rospkg.RosPack()
         # the urdf is generated in my macbook using the original jupyter notebook
         _urdf_path = (
-            os.path.join(rospack.get_path("stretch_shared_autonomy"), "urdf", "stretch_pruned.urdf")
+            os.path.join(rospack.get_path("driver_assistance"), "urdf", "stretch_pruned.urdf")
             if urdf_path is None
             else urdf_path
         )

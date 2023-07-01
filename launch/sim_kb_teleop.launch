@@ -1,4 +1,4 @@
 <launch>
-    <node name="teleop_controller" pkg="stretch_shared_autonomy" type="teleop_controller.py" respawn="true" />
-    <node name="kb_interface" pkg="stretch_shared_autonomy" type="keyboard_interface.py" output="screen" required="true" />
+    <node name="teleop_controller" pkg="driver_assistance" type="teleop_controller.py" respawn="true" />
+    <node name="kb_interface" pkg="driver_assistance" type="keyboard_interface.py" output="screen" required="true" />
 </launch>
