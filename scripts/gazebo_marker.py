@@ -6,6 +6,7 @@ author: Chen Chen
 """
 
 from __future__ import annotations
+
 import os
 
 import rospy
@@ -22,19 +23,21 @@ class GazeboMarker:
         x: float,
         y: float,
         z: float,
+        id: int,
+        frame: str,
         scale: float = 0.1,
-        id: int = 2,
-        frame: str = "odom",
         color: tuple[float, float, float, float] = (1.0, 1.0, 1.0, 0.8),
+        tf_prefix: str = "goal",
     ) -> None:
         self.pub = pub
         self.x = x
         self.y = y
         self.z = z
-        self.scale = scale
         self.id = id
         self.frame = frame
+        self.scale = scale
         self.color = color
+        self.tf_prefix = tf_prefix
         self.br = tf2_ros.StaticTransformBroadcaster()
         self.publish_marker()
 
@@ -46,7 +49,7 @@ class GazeboMarker:
     def broadcast_tf(self):
         tf_stamped = TransformStamped(
             header=Header(stamp=rospy.Time.now(), frame_id=self.frame),
-            child_frame_id=f"ee_goal{self.id}",
+            child_frame_id=f"{self.tf_prefix}{self.id}",
             transform=Transform(
                 translation=Vector3(self.x, self.y, self.z), rotation=Quaternion(0, 0, 0, 1)
             ),
@@ -55,11 +58,12 @@ class GazeboMarker:
 
     def publish_rviz_marker(self):
         marker = Marker(
-            type=Marker.SPHERE,
+            header=Header(stamp=rospy.Time.now(), frame_id=self.frame),
             id=self.id,
+            type=Marker.SPHERE,
+            action=Marker.MODIFY,
             pose=Pose(Point(self.x, self.y, self.z), Quaternion(0, 0, 0, 1)),
             scale=Vector3(*(self.scale,) * 3),
-            header=Header(frame_id=self.frame),
             color=ColorRGBA(*self.color),
         )
         self.pub.publish(marker)
@@ -101,16 +105,11 @@ class GazeboMarker:
 if __name__ == "__main__":
     rospy.init_node("gazebo_marker")
     marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
-    marker = GazeboMarker(marker_pub, 1, 1, 1)
-
+    marker = GazeboMarker(marker_pub, *(1, 1, 1), id=1, frame="odom")
     rospy.on_shutdown(marker.__del__)
 
-    rate = rospy.Rate(1)
+    rospy.sleep(1)
 
     marker.update(pos=(0, 1, 2), color=(0, 1, 0, 0.8))
 
-    try:
-        while not rospy.is_shutdown():
-            rate.sleep()
-    except rospy.ROSInterruptException:
-        pass
+    rospy.spin()

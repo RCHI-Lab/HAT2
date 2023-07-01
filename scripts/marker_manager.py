@@ -13,6 +13,13 @@ from tf2_ros import Buffer
 from visualization_msgs.msg import Marker
 
 
+class GoalManager:
+    def __init__(self) -> None:
+        goals: dict[int, Marker] = {}
+        rospy.on_shutdown(goals.clear)
+        pass
+
+
 def dist_between_tfs(buffer: Buffer, tf1: str, tf2: str) -> float | None:
     try:
         target_transform: TransformStamped = buffer.lookup_transform(
