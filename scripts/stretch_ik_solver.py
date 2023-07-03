@@ -56,7 +56,9 @@ class IKSolver:
         if len(q) != self.joint_num:
             raise ValueError(f"input q dimension is {len(q)}, expecting {self.joint_num}")
         q_kdl = self._get_q_kdl(q)
-        pass
+        qd = self.__ik_solver.CartToJnt(q_kdl, xd, q_kdl)
+        print(qd)
+        return qd
 
     def _get_q_kdl(self, q):
         q_kdl = kdl.JntArray(self.joint_num)
@@ -69,3 +71,4 @@ if __name__ == "__main__":
     ik_solver = IKSolver(verbose=True)
     q = [0] * 8
     ik_solver.solve_J_pinv(q, fixed_joints=(3,))
+    ik_solver.solve_IK((1,1,1), q)

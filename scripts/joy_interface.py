@@ -21,7 +21,7 @@ class JoyconInterface:
         for idx in range(5):
             vel[idx] = msg.axes[self.axis_assign[idx]] * self.axis_factors[idx]
         self.publisher.publish(
-            Float64MultiArray(data=[*vel[0:3], *[vel[3]] * 4, vel[4]])
+            Float64MultiArray(data=[*vel[:3], *[vel[3]] * 4, vel[4]])
         )
 
 

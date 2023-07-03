@@ -307,3 +307,6 @@ CATKIN_IGNORE
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/ros,python,c++,linux,visualstudiocode,cmake
+
+*.ipynb
+*.pdf

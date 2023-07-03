@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
+
 import numpy as np
 import rospy
-from joint_state_listener import JointStateListener
 from controller_base import ControllerBase
+from joint_state_listener import JointStateListener
 from stretch_ik_solver import IKSolver
 from typing_extensions import override
 
@@ -31,9 +33,7 @@ if __name__ == "__main__":
     r = rospy.Rate(30)
     rospy.sleep(0.5)
 
-    try:
+    with suppress(rospy.ROSInterruptException):
         while not rospy.is_shutdown():
             ctrler.step()
             r.sleep()
-    except rospy.ROSInterruptException:
-        pass

@@ -84,11 +84,7 @@ class PublishThread(threading.Thread):
 
         # Set timeout to None if rate is 0 (causes new_message to wait forever
         # for new data to publish)
-        if rate != 0.0:
-            self.timeout = 1.0 / rate
-        else:
-            self.timeout = None
-
+        self.timeout = 1.0 / rate if rate != 0.0 else None
         self.start()
 
     def wait_for_subscribers(self):
@@ -98,9 +94,9 @@ class PublishThread(threading.Thread):
                 print("Waiting for subscriber to connect to topic")
             rospy.sleep(0.5)
             i += 1
-            i = i % 5
+            i %= 5
         if rospy.is_shutdown():
-            raise Exception("Got shutdown request before subscribers connected")
+            raise RuntimeError("Got shutdown request before subscribers connected")
 
     def update(self, x, th, lift, arm_ext, wrist, speed, turn):
         self.condition.acquire()
@@ -152,18 +148,13 @@ def getKey(settings, timeout):
         tty.setraw(sys.stdin.fileno())
         # sys.stdin.read() returns a string on Linux
         rlist, _, _ = select([sys.stdin], [], [], timeout)
-        if rlist:
-            key = sys.stdin.read(1)
-        else:
-            key = ""
+        key = sys.stdin.read(1) if rlist else ""
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
     return key
 
 
 def saveTerminalSettings():
-    if sys.platform == "win32":
-        return None
-    return termios.tcgetattr(sys.stdin)
+    return None if sys.platform == "win32" else termios.tcgetattr(sys.stdin)
 
 
 def restoreTerminalSettings(old_settings):

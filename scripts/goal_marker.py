@@ -72,7 +72,7 @@ class GoalMarker:
         msg = f"action: ADD_MODIFY, type: SPHERE, id: {self.id}, "
         msg += f"scale: {{x:{self.scale}, y:{self.scale}, z:{self.scale}}}, "
         msg += f"pose: {{position: {{x:{self.x}, y:{self.y}, z:{self.z}}}, orientation: {{x:0, y:0, z:0, w:1}}}}"
-        os.system("gz marker -m '" + msg + "'")
+        os.system(f"gz marker -m '{msg}'")
 
     @property
     def position(self) -> tuple[float, float, float]:

@@ -45,10 +45,7 @@ if __name__ == "__main__":
     rospy.on_shutdown(vel_cmder.stop)
     while not rospy.is_shutdown():
         if j == 30:
-            if i == -1:
-                i = 1
-            else:
-                i = -1
+            i = 1 if i == -1 else -1
             j = 0
         j = j + 1
         vel_cmder.pub_vel([i * x for x in [0.5, 0.25, 0.2, 0.04, 0.04, 0.04, 0.04, 1]])

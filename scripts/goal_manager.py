@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+from contextlib import suppress
 from math import sqrt
 
 import rospy
@@ -44,26 +45,26 @@ if __name__ == "__main__":
     marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
     tf_buffer = tf2_ros.Buffer()
     tf_listener = tf2_ros.TransformListener(tf_buffer)
-    id = 1
+    goal_id = 1
     frame = "odom"
     marker_list = [
-        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), id, frame),
+        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), goal_id, frame),
     ]
 
     rospy.on_shutdown(marker_list.clear)
 
     rate = rospy.Rate(5)
 
-    try:
+    with suppress(rospy.ROSInterruptException):
         while not rospy.is_shutdown():
-            if (dist := dist_between_tfs(tf_buffer, f"goal{id}", "link_grasp_center")) is not None:
+            if (
+                dist := dist_between_tfs(tf_buffer, f"goal{goal_id}", "link_grasp_center")
+            ) is not None:
                 rospy.loginfo_throttle(0.5, f"distance: {dist}")
                 if dist < 0.01:
                     marker_list.clear()
                     marker_list.append(
-                        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), id, frame)
+                        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), goal_id, frame)
                     )
                     rospy.sleep(0.5)
             rate.sleep()
-    except rospy.ROSInterruptException:
-        pass
