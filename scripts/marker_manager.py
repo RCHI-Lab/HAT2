@@ -14,8 +14,8 @@ from driver_assistance.msg import GoalBelief, GoalBeliefArray
 class MarkerManager:
     def __init__(self, frame="odom") -> None:
         self.frame = frame
-        self.pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
-        self.sub = rospy.Subscriber("/goal_visualization", GoalBeliefArray, self.goal_beliefs_cb)
+        self.pub = rospy.Publisher("/visualization_marker", Marker, queue_size=10)
+        self.sub = rospy.Subscriber("/goal_beliefs", GoalBeliefArray, self.goal_beliefs_cb)
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
         self.goals: dict[int, GoalMarker] = {}

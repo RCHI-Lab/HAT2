@@ -1,0 +1,14 @@
+<launch>
+    <arg name="interface" default="keyboard" />
+    <arg name="shared" default="false" />
+
+    <node name="teleop_controller" pkg="driver_assistance" type="teleop_controller.py" respawn="true" unless="$(arg shared)"/>
+    <node name="shared_controller" pkg="driver_assistance" type="shared_controller.py" respawn="true" if="$(arg shared)"/>
+    <group if="$(eval interface == 'joy')">
+        <node name="joy_interface" pkg="driver_assistance" type="joy_interface.py" required="true" />
+        <node name="joy_node" pkg="joy" type="joy_node" required="true" />
+    </group>
+    <node name="kb_interface" pkg="driver_assistance" type="keyboard_interface.py" output="screen" required="true"
+        if="$(eval interface == 'keyboard')" />
+    <node name="goal_manager" pkg="driver_assistance" type="single_goal_manager.py" required="true" />
+</launch>

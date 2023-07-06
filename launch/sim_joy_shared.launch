@@ -1,6 +1,0 @@
-<launch>
-    <node name="shared_controller" pkg="driver_assistance" type="shared_controller.py" respawn="true" />
-    <node name="joy_interface" pkg="driver_assistance" type="joy_interface.py" required="true" />
-    <node name="goal_manager" pkg="driver_assistance" type="goal_manager.py" />
-    <node name="joy_node" pkg="joy" type="joy_node" required="true" />
-</launch>

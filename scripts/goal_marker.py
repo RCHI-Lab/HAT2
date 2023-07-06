@@ -42,7 +42,7 @@ class GoalMarker:
         self.publish_marker()
 
     def publish_marker(self):
-        self.publish_gazebo_marker()
+        # self.publish_gazebo_marker()
         self.publish_rviz_marker()
         self.broadcast_tf()
 
