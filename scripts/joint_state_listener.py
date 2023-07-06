@@ -9,6 +9,7 @@ class JointStateListener:
     def __init__(self) -> None:
         rospy.Subscriber("/joint_states", JointState, self.joint_state_cb)
         self.msg: JointState | None = None
+        rospy.wait_for_message("/joint_states", JointState)
 
     def joint_state_cb(self, joint_states: JointState) -> None:
         self.msg = joint_states

@@ -1,5 +1,0 @@
-<launch>
-    <node name="shared_controller" pkg="driver_assistance" type="shared_controller.py" respawn="true" />
-    <node name="kb_interface" pkg="driver_assistance" type="keyboard_interface.py" output="screen" required="true" />
-    <node name="goal_manager" pkg="driver_assistance" type="goal_manager.py" />
-</launch>
