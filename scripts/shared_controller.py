@@ -15,7 +15,7 @@ from typing_extensions import override
 
 class AutoReachController(ControllerBase):
     def __init__(
-        self, fixed_joints=(), constraint: Literal["soft", "none"] = "none", max_vel=0.05
+        self, fixed_joints=(), constraint: Literal["hard", "soft", "none"] = "none", max_vel=0.05
     ) -> None:
         super().__init__(uh_topic="/teleop_velocity_command")
         self._ik_solver = IKSolver()

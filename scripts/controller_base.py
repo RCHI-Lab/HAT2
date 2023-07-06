@@ -33,7 +33,7 @@ class ControllerBase(abc.ABC):
         pass
 
     # TODO refactor, function to get both target and ee position
-    def get_err(self, target_frame="ee_goal", base_frame="base_link") -> tuple | None:
+    def get_err(self, target_frame="goal", base_frame="base_link") -> tuple | None:
         try:
             target_transform: TransformStamped = self._tf_buffer.lookup_transform(
                 base_frame, target_frame, rospy.Time(), timeout=rospy.Duration(secs=5)

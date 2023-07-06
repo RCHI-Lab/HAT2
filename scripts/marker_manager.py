@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-import random
-from math import sqrt
-
 import rospy
 import tf2_ros
-from goal_marker import GoalMarker
 from geometry_msgs.msg import TransformStamped
+from goal_marker import GoalMarker
 from visualization_msgs.msg import Marker
-from driver_assistance.msg import GoalBeliefArray, GoalBelief
+
+from driver_assistance.msg import GoalBelief, GoalBeliefArray
 
 
 class MarkerManager:
@@ -22,22 +20,22 @@ class MarkerManager:
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
         self.goals: dict[int, GoalMarker] = {}
         rospy.on_shutdown(self.goals.clear)
-    
+
     def goal_beliefs_cb(self, msg: GoalBeliefArray) -> None:
         goal: GoalBelief
         for goal in msg.goals:
-            goal_transform: TransformStamped = self.tf_buffer.lookup_transform(
+            goal_tf: TransformStamped = self.tf_buffer.lookup_transform(
                 self.frame, f"goal{goal.id}", rospy.Time()
             )
-            goal_pos = goal_transform.transform.translation
-            self.add_update_goal(goal.id, goal_pos, goal.belief)
+            goal_pos = goal_tf.transform.translation
+            self.add_update_goal(goal.id, (goal_pos.x, goal_pos.y, goal_pos.z), goal.belief)
 
     def add_update_goal(self, id: int, pos: tuple[float, float, float], belief: float) -> None:
         """Add a new goal marker if it doesn't exist, otherwise update it"""
         if id not in self.goals.keys():
             self.add_goal(id, pos, belief)
         self.update_goal(id, pos, belief)
-    
+
     def add_goal(self, id: int, pos: tuple[float, float, float], belief: float) -> None:
         """Add a new goal marker"""
         if id in self.goals.keys():
