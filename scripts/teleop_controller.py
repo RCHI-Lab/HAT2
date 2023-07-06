@@ -7,6 +7,8 @@ author: Chen Chen
 
 from __future__ import annotations
 
+from contextlib import suppress
+
 import rospy
 from controller_base import ControllerBase
 from typing_extensions import override
@@ -26,6 +28,7 @@ if __name__ == "__main__":
     ctrler = TeleopController()
     r = rospy.Rate(30)
 
-    while not rospy.is_shutdown():
-        ctrler.step()
-        r.sleep()
+    with suppress(rospy.ROSInterruptException):
+        while not rospy.is_shutdown():
+            ctrler.step()
+            r.sleep()
