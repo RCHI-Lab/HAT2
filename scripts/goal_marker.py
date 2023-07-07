@@ -27,7 +27,9 @@ class GoalMarker:
         frame: str,
         scale: float = 0.1,
         color: tuple[float, float, float, float] = (1.0, 1.0, 1.0, 0.8),
-        tf_prefix: str = "goal",
+        tf_prefix: str = "goal_marker",
+        gazebo: bool = False,
+        tf: bool = False,
     ) -> None:
         self.pub = pub
         self.x = x
@@ -38,13 +40,18 @@ class GoalMarker:
         self.scale = scale
         self.color = color
         self.tf_prefix = tf_prefix
-        self.br = tf2_ros.StaticTransformBroadcaster()
+        self.gazebo = gazebo
+        self.tf = tf
+        if self.tf:
+            self.br = tf2_ros.StaticTransformBroadcaster()
         self.publish_marker()
 
     def publish_marker(self):
-        # self.publish_gazebo_marker()
+        if self.gazebo:
+            self.publish_gazebo_marker()
         self.publish_rviz_marker()
-        self.broadcast_tf()
+        if self.tf:
+            self.broadcast_tf()
 
     def broadcast_tf(self):
         tf_stamped = TransformStamped(
@@ -97,7 +104,8 @@ class GoalMarker:
 
     def __del__(self) -> None:
         # cannot delete tf frame
-        os.system(f"gz marker -m 'action: DELETE_MARKER, id: {self.id}'")
+        if self.gazebo:
+            os.system(f"gz marker -m 'action: DELETE_MARKER, id: {self.id}'")
         marker = Marker(action=Marker.DELETE, id=self.id)
         self.pub.publish(marker)
 

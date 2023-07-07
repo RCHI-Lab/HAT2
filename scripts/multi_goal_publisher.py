@@ -8,8 +8,8 @@ from math import sqrt
 
 import rospy
 import tf2_ros
-from geometry_msgs.msg import TransformStamped, Transform, Vector3, Quaternion
-from std_msgs.msg import UInt32MultiArray, Header
+from geometry_msgs.msg import Quaternion, Transform, TransformStamped, Vector3
+from std_msgs.msg import Header, UInt32MultiArray
 
 
 def dist_between_tfs(buffer: tf2_ros.Buffer, tf1: str, tf2: str) -> float | None:
@@ -41,7 +41,7 @@ def get_new_marker_pose(buffer: tf2_ros.Buffer, range=0.4) -> tuple[float, float
 
 if __name__ == "__main__":
     rospy.init_node("goal_manager")
-    pub = rospy.Publisher("/goal_ids", UInt32MultiArray, queue_size=2)
+    pub = rospy.Publisher("/goal_ids", UInt32MultiArray, queue_size=2, latch=True)
     tf_buffer = tf2_ros.Buffer()
     tf_listener = tf2_ros.TransformListener(tf_buffer)
     tf_br = tf2_ros.StaticTransformBroadcaster()
@@ -52,17 +52,18 @@ if __name__ == "__main__":
     }
     rate = rospy.Rate(5)
 
-    for id in goals:
-        tf_stamped = TransformStamped(
+    # send a tf list because of the latching mechanism (can only send last message to new subscribers)
+    tf_list = [
+        TransformStamped(
             header=Header(stamp=rospy.Time.now(), frame_id=frame),
             child_frame_id=f"goal{id}",
-            transform=Transform(
-                translation=Vector3(*goals[id]), rotation=Quaternion(0, 0, 0, 1)
-            ),
+            transform=Transform(translation=Vector3(*goals[id]), rotation=Quaternion(0, 0, 0, 1)),
         )
-        tf_br.sendTransform(tf_stamped)
+        for id in goals
+    ]
+    tf_br.sendTransform(tf_list)
+    pub.publish(UInt32MultiArray(data=goals.keys()))
 
     with suppress(rospy.ROSInterruptException):
         while not rospy.is_shutdown():
-            pub.publish(UInt32MultiArray(data=goals.keys()))
             rate.sleep()
