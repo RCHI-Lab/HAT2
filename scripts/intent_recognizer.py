@@ -26,10 +26,16 @@ class IntentRecognizer(abc.ABC):
         if uh_topic:
             self._uh_sub = rospy.Subscriber(uh_topic, Float64MultiArray, self.uh_cb)
             self.wait_for_uh(uh_topic)
+        self.wait_for_ids(perception_topic)
 
     def wait_for_ids(self, perception_topic) -> None:
         rospy.loginfo(f"waiting for message from {perception_topic} topic")
-        rospy.wait_for_message(perception_topic, UInt32MultiArray)
+        msg = rospy.wait_for_message(perception_topic, UInt32MultiArray)
+        # wait for tfs to be published
+        for id in msg.data:
+            self._tf_buffer.lookup_transform(
+                "link_grasp_center", f"goal{id}", rospy.Time(), rospy.Duration(5)
+            )
 
     def id_cb(self, msg: UInt32MultiArray) -> None:
         for id in msg.data:
