@@ -59,7 +59,7 @@ if __name__ == "__main__":
     with suppress(rospy.ROSInterruptException):
         while not rospy.is_shutdown():
             if (
-                dist := dist_between_tfs(tf_buffer, f"goal{goal_id}", "link_grasp_center")
+                dist := dist_between_tfs(tf_buffer, f"goal_marker{goal_id}", "link_grasp_center")
             ) is not None:
                 rospy.loginfo_throttle(0.5, f"distance: {dist}")
                 if dist < 0.01:
