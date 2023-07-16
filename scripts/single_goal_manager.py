@@ -45,11 +45,11 @@ if __name__ == "__main__":
     marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=2)
     tf_buffer = tf2_ros.Buffer()
     tf_listener = tf2_ros.TransformListener(tf_buffer)
-    goal_id = 1
+    goal_id = 0
     frame = "odom"
     tf_buffer.lookup_transform("odom", "base_link", rospy.Time(), timeout=rospy.Duration(secs=10)) # wait for tf
     marker_list = [
-        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), goal_id, frame),
+        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), goal_id, frame, tf_prefix="goal", tf=True)
     ]
 
     rospy.on_shutdown(marker_list.clear)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
                 if dist < 0.01:
                     marker_list.clear()
                     marker_list.append(
-                        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), goal_id, frame)
+                        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), goal_id, frame, tf_prefix="goal", tf=True)
                     )
                     rospy.sleep(0.5)
             rate.sleep()

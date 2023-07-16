@@ -1,4 +1,4 @@
 <launch>
-    <node name="auto_reach_controller" pkg="driver_assistance" type="auto_reach_controller.py" />
+    <node name="auto_reach_controller" pkg="driver_assistance" type="auto_reach_controller.py" output="screen" />
     <node name="single_goal_manager" pkg="driver_assistance" type="single_goal_manager.py" />
 </launch>
