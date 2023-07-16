@@ -22,6 +22,14 @@ class ControllerBase(abc.ABC):
         self.verbose = verbose
         rospy.on_shutdown(self.stop)
 
+    def clamp_qd(self, q_dot):
+        if self.max_speed is None:
+            return q_dot
+        if (length := np.linalg.norm(q_dot)) > self.max_speed:
+            rospy.loginfo_throttle(1, length)
+            q_dot = q_dot / length * self.max_speed
+        return q_dot
+
     def uh_cb(self, data: Float64MultiArray) -> None:
         """human input callback function"""
         self.uh = np.array(data.data)

@@ -26,11 +26,8 @@ class AutoReachController(ControllerBase):
         err = np.array(self.get_err(target_frame="goal0"))
         q_dot = J_pinv @ err[:3]
         if self.clamp:
-            if (length := np.linalg.norm(q_dot)) > self.max_speed:
-                rospy.loginfo_throttle(1, length)
-                q_dot = q_dot / length * self.max_speed
+            q_dot = self.clamp_qd(q_dot)
         self._vel_cmder.pub_vel(q_dot)
-        # rospy.loginfo_throttle(1, q_dot)
 
 
 if __name__ == "__main__":

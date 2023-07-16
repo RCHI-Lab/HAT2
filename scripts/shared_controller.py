@@ -17,14 +17,14 @@ from driver_assistance.msg import GoalBelief, GoalBeliefArray
 
 class SharedController(ControllerBase):
     def __init__(
-        self, fixed_joints=(), constraint: Literal["hard", "soft", "none"] = "none", max_vel=0.05
+        self, fixed_joints=(), constraint: Literal["hard", "soft", "none"] = "none", max_speed=0.05
     ) -> None:
         super().__init__(uh_topic="/teleop_velocity_command")
         self._ik_solver = IKSolver()
         self._jnt_state_listener = JointStateListener()
         self.fixed_joints = set(fixed_joints)
         self.constraint = constraint
-        self.max_vel = max_vel
+        self.max_speed = max_speed
         self.goal_sub = rospy.Subscriber("/goal_beliefs", GoalBeliefArray, self.goal_beliefs_cb)
         self.goal_beliefs: dict[int, float] = {}
         self.sorted_goals: list[tuple[int, float]] = []
@@ -34,7 +34,7 @@ class SharedController(ControllerBase):
         for goal in msg.goals:
             self.goal_beliefs[goal.id] = goal.belief
         self.sorted_goals = sorted(self.goal_beliefs.items(), key=lambda x: x[1], reverse=True)
-        
+
     @property
     def confidence(self):
         if len(self.sorted_goals) < 2:

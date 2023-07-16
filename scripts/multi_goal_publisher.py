@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import random
-from contextlib import suppress
 from math import sqrt
 
 import rospy
@@ -50,7 +49,7 @@ if __name__ == "__main__":
     goals: dict[int, tuple[float, float, float]] = {
         i: get_new_marker_pose(tf_buffer) for i in range(5)
     }
-    rate = rospy.Rate(5)
+    rospy.on_shutdown(goals.clear)
 
     # send a tf list because of the latching mechanism (can only send last message to new subscribers)
     tf_list = [
@@ -64,6 +63,4 @@ if __name__ == "__main__":
     tf_br.sendTransform(tf_list)
     pub.publish(UInt32MultiArray(data=goals.keys()))
 
-    with suppress(rospy.ROSInterruptException):
-        while not rospy.is_shutdown():
-            rate.sleep()
+    rospy.spin()
