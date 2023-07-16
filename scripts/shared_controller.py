@@ -17,14 +17,17 @@ from driver_assistance.msg import GoalBelief, GoalBeliefArray
 
 class SharedController(ControllerBase):
     def __init__(
-        self, fixed_joints=(), constraint: Literal["hard", "soft", "none"] = "none", max_speed=0.05
+        self, fixed_joints=(), constraint: Literal["hard", "soft", "none"] = "none", clamp=False, max_speed=0.5, soft_max_vel=0.05, use_cofidence=False
     ) -> None:
         super().__init__(uh_topic="/teleop_velocity_command")
         self._ik_solver = IKSolver()
         self._jnt_state_listener = JointStateListener()
         self.fixed_joints = set(fixed_joints)
         self.constraint = constraint
+        self.clamp = clamp
         self.max_speed = max_speed
+        self.soft_max_vel = soft_max_vel
+        self.use_confidence = use_cofidence
         self.goal_sub = rospy.Subscriber("/goal_beliefs", GoalBeliefArray, self.goal_beliefs_cb)
         self.goal_beliefs: dict[int, float] = {}
         self.sorted_goals: list[tuple[int, float]] = []
@@ -57,28 +60,32 @@ class SharedController(ControllerBase):
                 q, fixed_joints=self.fixed_joints, only_trans=True
             )
         err = np.array(self.get_err(target_frame=f"goal{self.current_goal}"))
-        return J_pinv @ err[:3]
+        q_dot = J_pinv @ err[:3]
+        return self.clamp_qd(q_dot) if self.clamp else q_dot
 
     def combine(self, ur):
-        if np.linalg.norm(self.uh) <= 0:
+        if (not self.use_confidence) and np.linalg.norm(self.uh) <= 0:
             return np.zeros(ur.shape)
         if self.constraint == "soft":
             # clip the joint velocity where uh is not 0
             if soft_joints := [i for i in range(8) if self.uh[i] != 0]:
-                ur[soft_joints] = np.clip(ur[soft_joints], -self.max_vel, self.max_vel)
-        return ur + self.confidence * self.uh
+                ur[soft_joints] = np.clip(ur[soft_joints], -self.soft_max_vel, self.soft_max_vel)
+        if self.use_confidence:
+            rospy.loginfo_throttle(0.5, f"goal: {self.current_goal}, confidence: {self.confidence:.3f}\r")
+            return self.confidence * ur + self.uh
+        else:
+            return ur + self.uh
 
     @override
     def step(self):
         ur = self.auto_step()
         q_dot = self.combine(ur)
         self._vel_cmder.pub_vel(q_dot)
-        rospy.loginfo_throttle(1, q_dot)
 
 
 if __name__ == "__main__":
     rospy.init_node("shared_controller")
-    ctrler = SharedController(fixed_joints=(), constraint="soft")
+    ctrler = SharedController(fixed_joints=(), constraint="soft", use_cofidence=True)
     r = rospy.Rate(30)
     rospy.sleep(0.5)
 

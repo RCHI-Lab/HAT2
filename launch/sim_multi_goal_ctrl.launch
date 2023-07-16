@@ -5,7 +5,7 @@
     <node name="teleop_controller" pkg="driver_assistance" type="teleop_controller.py" respawn="true"
         unless="$(arg shared)" />
     <node name="shared_controller" pkg="driver_assistance" type="shared_controller.py" respawn="true"
-        if="$(arg shared)" />
+        if="$(arg shared)" output="screen" />
     <group if="$(eval interface == 'joy')">
         <node name="joy_interface" pkg="driver_assistance" type="joy_interface.py" required="true" />
         <node name="joy_node" pkg="joy" type="joy_node" required="true" />
