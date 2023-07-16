@@ -21,7 +21,7 @@ class AutoReachController(ControllerBase):
     def step(self):
         dur, q = self._jnt_state_listener.get_state()
         J_pinv = self._ik_solver.solve_J_pinv(q, fixed_joints=self.fixed_joints, only_trans=True)
-        err = np.array(self.get_err(target_frame="ee_goal2"))
+        err = np.array(self.get_err(target_frame="goal_marker1"))
         q_dot = J_pinv @ err[:3]
         self._vel_cmder.pub_vel(q_dot)
         rospy.loginfo_throttle(1, q_dot)

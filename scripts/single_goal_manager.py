@@ -49,7 +49,7 @@ if __name__ == "__main__":
     frame = "odom"
     tf_buffer.lookup_transform("odom", "base_link", rospy.Time(), timeout=rospy.Duration(secs=10)) # wait for tf
     marker_list = [
-        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), goal_id, frame),
+        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), goal_id, frame, tf=True),
     ]
 
     rospy.on_shutdown(marker_list.clear)
@@ -59,13 +59,13 @@ if __name__ == "__main__":
     with suppress(rospy.ROSInterruptException):
         while not rospy.is_shutdown():
             if (
-                dist := dist_between_tfs(tf_buffer, f"goal{goal_id}", "link_grasp_center")
+                dist := dist_between_tfs(tf_buffer, f"goal_marker{goal_id}", "link_grasp_center")
             ) is not None:
                 rospy.loginfo_throttle(0.5, f"distance: {dist}")
                 if dist < 0.01:
                     marker_list.clear()
                     marker_list.append(
-                        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), goal_id, frame)
+                        GoalMarker(marker_pub, *get_new_marker_pose(tf_buffer), goal_id, frame, tf=True)
                     )
                     rospy.sleep(0.5)
             rate.sleep()
