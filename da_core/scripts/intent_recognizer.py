@@ -12,7 +12,7 @@ import tf2_ros
 from geometry_msgs.msg import Vector3
 from std_msgs.msg import Float64MultiArray, UInt32MultiArray
 
-from driver_assistance.msg import GoalBelief, GoalBeliefArray
+from da_core.msg import GoalBelief, GoalBeliefArray
 
 
 class IntentRecognizer(abc.ABC):

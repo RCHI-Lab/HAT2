@@ -12,7 +12,7 @@ class IKSolver:
         rospack = rospkg.RosPack()
         # the urdf is generated in my macbook using the original jupyter notebook
         _urdf_path = (
-            os.path.join(rospack.get_path("driver_assistance"), "urdf", "stretch_pruned.urdf")
+            os.path.join(rospack.get_path("da_core"), "urdf", "stretch_pruned.urdf")
             if urdf_path is None
             else urdf_path
         )
@@ -51,7 +51,7 @@ class IKSolver:
                 print(J)
                 print(J_pinv)
         return J_pinv
-    
+
     def solve_IK(self, xd, q, fixed_joints=()):
         if len(q) != self.joint_num:
             raise ValueError(f"input q dimension is {len(q)}, expecting {self.joint_num}")
@@ -71,4 +71,4 @@ if __name__ == "__main__":
     ik_solver = IKSolver(verbose=True)
     q = [0] * 8
     ik_solver.solve_J_pinv(q, fixed_joints=(3,))
-    ik_solver.solve_IK((1,1,1), q)
+    ik_solver.solve_IK((1, 1, 1), q)

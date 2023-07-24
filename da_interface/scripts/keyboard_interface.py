@@ -15,7 +15,6 @@ from select import select
 
 import rospy
 from std_msgs.msg import Float64MultiArray
-from velocity_commander import VelocityCommander
 
 if sys.platform == "win32":
     import msvcrt

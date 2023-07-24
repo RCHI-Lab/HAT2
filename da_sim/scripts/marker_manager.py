@@ -6,7 +6,7 @@ import rospy
 from goal_marker import GoalMarker
 from visualization_msgs.msg import Marker
 
-from driver_assistance.msg import GoalBelief, GoalBeliefArray
+from da_core.msg import GoalBelief, GoalBeliefArray
 
 
 class MarkerManager:

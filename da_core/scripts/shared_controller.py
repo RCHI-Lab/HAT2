@@ -12,7 +12,7 @@ from joint_state_listener import JointStateListener
 from stretch_ik_solver import IKSolver
 from typing_extensions import override
 
-from driver_assistance.msg import GoalBelief, GoalBeliefArray
+from da_core.msg import GoalBelief, GoalBeliefArray
 
 
 class SharedController(ControllerBase):
