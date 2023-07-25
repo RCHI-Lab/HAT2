@@ -1,0 +1,12 @@
+<launch>
+    <arg name="interface" default="keyboard" />
+
+    <node name="teleop_controller" pkg="da_core" type="teleop_controller.py" respawn="true" output="screen" />
+    <group if="$(eval interface == 'joy')">
+        <node name="joy_interface" pkg="da_interface" type="joy_interface.py" required="true" />
+        <node name="joy_node" pkg="joy" type="joy_node" required="true" />
+    </group>
+    <node name="kb_interface" pkg="da_interface" type="keyboard_interface.py" output="screen" required="true"
+        if="$(eval interface == 'keyboard')" />
+    <node name="stretch_controller" pkg="da_stretch" type="stretch_controller.py" />
+</launch>

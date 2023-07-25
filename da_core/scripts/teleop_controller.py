@@ -26,7 +26,7 @@ class TeleopController(ControllerBase):
 if __name__ == "__main__":
     rospy.init_node("teleop_controller")
     ctrler = TeleopController()
-    r = rospy.Rate(30)
+    r = rospy.Rate(15)
 
     with suppress(rospy.ROSInterruptException):
         while not rospy.is_shutdown():

@@ -18,7 +18,7 @@ class ControllerBase(abc.ABC):
             self.uh = np.zeros(8)
         self._tf_buffer = tf2_ros.Buffer()
         self._tf_listener = tf2_ros.TransformListener(self._tf_buffer)
-        self._vel_cmder = SimVelocityCommander()
+        self._vel_cmder = RealVelocityCommander()
         self.verbose = verbose
         rospy.on_shutdown(self.stop)
 
