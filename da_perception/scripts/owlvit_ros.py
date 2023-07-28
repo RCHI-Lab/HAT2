@@ -1,5 +1,7 @@
 #!/home/hat/da_ws/src/driver_assistance/da_perception/.venv/bin/python3
 
+from __future__ import annotations
+
 import sys
 
 import cv2
@@ -12,9 +14,10 @@ from transformers import OwlViTForObjectDetection, OwlViTProcessor
 from transformers.image_utils import ImageFeatureExtractionMixin
 
 
-class image_converter:
+class OwlViTRos:
     def __init__(self):
         self.bridge = CvBridge()
+        self.latest_image: np.ndarray | None = None
         self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.callback)
         self.model = OwlViTForObjectDetection.from_pretrained("google/owlvit-base-patch32")
         self.processor = OwlViTProcessor.from_pretrained("google/owlvit-base-patch32")
@@ -28,18 +31,24 @@ class image_converter:
 
     def callback(self, data):
         try:
-            image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            self.latest_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
             print(e)
 
-        text_queries = ["green cup"]
-        image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
-        image = self.center_crop_to_square(image)
-        inputs = self.processor(text=text_queries, images=image, return_tensors="pt").to(
-            self.device
-        )
+    def process(self):
+        if self.latest_image is None:
+            return
+        queries = ["red cup", "blue cup", "green cup", "pink cup"]
+        cv2_img = self.latest_image.copy()
+        cv2_img = cv2.rotate(cv2_img, cv2.ROTATE_90_CLOCKWISE)
+        cv2_img = self.center_crop_to_square(cv2_img)
+
+        # input image need to be rgb
+        rgb_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
+        inputs = self.processor(text=queries, images=rgb_img, return_tensors="pt").to(self.device)
         with torch.no_grad():
             outputs = self.model(**inputs)
+
         # Threshold to eliminate low probability predictions
         score_threshold = 0.08
         # Get prediction logits
@@ -53,16 +62,16 @@ class image_converter:
             if score < score_threshold:
                 continue
             self.draw_detection(
-                image,
+                cv2_img,
                 {
-                    "label": label,
+                    "label": queries[label],
                     "confidence": score,
                     "box": box,
                 },
             )
-        cv2.imshow("Image window", image)
+        cv2.imshow(" window", cv2_img)
         cv2.waitKey(3)
-        
+
     def center_crop_to_square(self, image):
         height, width = image.shape[:2]
 
@@ -135,15 +144,13 @@ class image_converter:
         )
 
 
-def main(args):
-    ic = image_converter()
-    rospy.init_node("image_converter", anonymous=True)
-    try:
-        rospy.spin()
-    except KeyboardInterrupt:
-        print("Shutting down")
-    cv2.destroyAllWindows()
-
-
 if __name__ == "__main__":
-    main(sys.argv)
+    rospy.init_node("OwlViT", anonymous=True)
+    Owl = OwlViTRos()
+    rate = rospy.Rate(1)
+
+    while not rospy.is_shutdown():
+        Owl.process()
+        rate.sleep()
+
+    cv2.destroyAllWindows()
