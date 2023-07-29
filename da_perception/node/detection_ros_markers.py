@@ -53,15 +53,6 @@ class DetectionBoxMarker:
     def get_marker_point_cloud(self):
         return self.points_array
 
-    # def get_plane_fit_point_cloud(self):
-    #     if self.plane is None:
-    #         return None
-    #     origin = np.array(self.marker_position)
-    #     side_length = max(self.detection_box_width_m, self.detection_box_height_m)
-    #     sample_spacing = 0.001
-    #     points = self.plane.get_points_on_plane(origin, side_length, sample_spacing)
-    #     return points
-
     def update(self, detection_3d, timestamp, frame_number):
         self.timestamp = timestamp
         self.frame_number = frame_number
@@ -79,21 +70,6 @@ class DetectionBoxMarker:
             self.detection_box_height_m = self.box_3d["height_m"]
 
         self.ready = True
-
-    # def get_landmarks_marker(self, landmark_color_dict=None):
-    #     marker = None
-    #     if self.landmarks_xyz is not None:
-    #         id_num = (4 * self.detection_box_id) + 3
-    #         marker = hr.create_points_marker(
-    #             self.landmarks_xyz,
-    #             id_num,
-    #             self.frame_id,
-    #             self.timestamp,
-    #             points_rgba=landmark_color_dict,
-    #             duration_s=self.lifetime_s,
-    #             point_width=0.02,
-    #         )
-    #     return marker
 
     def get_ros_marker(self):
         if (not self.ready) or (self.box_3d is None):
@@ -256,7 +232,6 @@ class DetectionBoxMarkerCollection:
 
         for detection_3d in detections_3d:
             box_3d = detection_3d["box_3d"]
-            # if (box_3d is not None) or (landmarks_3d is not None):
             if box_3d is not None:
                 self.detection_box_id += 1
                 label = detection_3d["label"]
@@ -268,7 +243,7 @@ class DetectionBoxMarkerCollection:
                     detection_3d, self.timestamp, self.frame_number
                 )
 
-    def get_ros_marker_array(self, landmark_color_dict=None):
+    def get_ros_marker_array(self) -> MarkerArray:
         marker_array = MarkerArray()
         for key in self.collection:
             marker = self.collection[key]
@@ -276,10 +251,6 @@ class DetectionBoxMarkerCollection:
                 ros_marker = marker.get_ros_marker()
                 if ros_marker is not None:
                     marker_array.markers.append(ros_marker)
-
-                # landmarks_marker = marker.get_landmarks_marker(landmark_color_dict)
-                # if landmarks_marker is not None:
-                #     marker_array.markers.append(landmarks_marker)
         return marker_array
 
     def get_ros_axes_array(self, include_z_axes=True, include_axes=True, axes_scale=1.0):

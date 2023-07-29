@@ -21,15 +21,6 @@ class OwlViTObjectDetector:
         self.model = self.model.to(self.device)
         self.model.eval()
 
-    def get_landmark_names(self):
-        return None
-
-    def get_landmark_colors(self):
-        return None
-
-    def get_landmark_color_dict(self):
-        return None
-
     def center_crop_to_square(self, image):
         height, width = image.shape[:2]
 
@@ -95,7 +86,6 @@ class OwlViTObjectDetector:
             y_min = bound_y(int(round(y_min)))
             x_max = bound_x(int(round(x_max)))
             y_max = bound_y(int(round(y_max)))
-            print(x_min, y_min, x_max, y_max)
 
             corner_box = (x_min, y_min, x_max, y_max)
 
@@ -115,10 +105,6 @@ class OwlViTObjectDetector:
             output_image = bgr_img.copy()
             for detection_dict in results:
                 self.draw_detection(output_image, detection_dict)
-
-            # cv2.imshow("window", output_image)
-            # print(output_image)
-            # cv2.waitKey(3)
 
         return results, output_image
 

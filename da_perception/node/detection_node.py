@@ -3,13 +3,11 @@
 import struct
 
 import cv2
-import detection_2d_to_3d as d2
-import detection_ros_markers as dr
 import message_filters
-import numpy as np
-np.float = np.float64
-import ros_numpy
 import rospy
+from cv_bridge import CvBridge, CvBridgeError
+from detection_2d_to_3d import detections_2d_to_3d
+from detection_ros_markers import DetectionBoxMarkerCollection
 from sensor_msgs import point_cloud2
 from sensor_msgs.msg import CameraInfo, Image, PointCloud2, PointField
 from std_msgs.msg import Header
@@ -37,26 +35,26 @@ class DetectionNode:
 
         self.detector = detector
 
-        self.marker_collection = dr.DetectionBoxMarkerCollection(default_marker_name)
+        self.marker_collection = DetectionBoxMarkerCollection(default_marker_name)
 
-        self.landmark_color_dict = self.detector.get_landmark_color_dict()
         self.topic_base_name = topic_base_name
         self.node_name = node_name
         self.min_box_side_m = min_box_side_m
         self.max_box_side_m = max_box_side_m
         self.modify_3d_detections = modify_3d_detections
         self.image_count = 0
+        self.bridge = CvBridge()
 
     def image_callback(self, ros_rgb_image, ros_depth_image, rgb_camera_info):
-        self.rgb_image = ros_numpy.numpify(ros_rgb_image)
+        try:
+            self.rgb_image = self.bridge.imgmsg_to_cv2(ros_rgb_image, "bgr8")
+            self.depth_image = self.bridge.imgmsg_to_cv2(ros_depth_image, "passthrough")
+        except CvBridgeError as e:
+            print(e)
         self.rgb_image_timestamp = ros_rgb_image.header.stamp
-        self.depth_image = ros_numpy.numpify(ros_depth_image)
         self.depth_image_timestamp = ros_depth_image.header.stamp
         self.camera_info = rgb_camera_info
         self.image_count = self.image_count + 1
-
-        # OpenCV expects bgr images, but numpify by default returns rgb images.
-        self.rgb_image = cv2.cvtColor(self.rgb_image, cv2.COLOR_RGB2BGR)
 
         # Copy the depth image to avoid a change to the depth image
         # during the update.
@@ -84,7 +82,7 @@ class DetectionNode:
             )
 
         debug_output = False
-        center_crop = False
+        center_crop = True
         detections_2d, output_image = self.detector.apply_to_image(
             detection_box_image, draw_output=debug_output, crop=center_crop
         )
@@ -96,7 +94,7 @@ class DetectionNode:
                 output_image,
             )
 
-        detections_3d = d2.detections_2d_to_3d(
+        detections_3d = detections_2d_to_3d(
             detections_2d,
             self.rgb_image,
             self.camera_info,
@@ -105,12 +103,12 @@ class DetectionNode:
             max_box_side_m=self.max_box_side_m,
         )
 
-        # if self.modify_3d_detections is not None:
-        #     detections_3d = self.modify_3d_detections(detections_3d)
+        if self.modify_3d_detections is not None:
+            detections_3d = self.modify_3d_detections(detections_3d)
 
         self.marker_collection.update(detections_3d, self.rgb_image_timestamp)
 
-        marker_array = self.marker_collection.get_ros_marker_array(self.landmark_color_dict)
+        marker_array = self.marker_collection.get_ros_marker_array()
         include_axes = True
         include_z_axes = False
         axes_array = None
@@ -124,10 +122,6 @@ class DetectionNode:
             for marker in self.marker_collection:
                 marker_points = marker.get_marker_point_cloud()
                 self.add_point_array_to_point_cloud(marker_points)
-                # publish_plane_points = False
-                # if publish_plane_points:
-                #     plane_points = marker.get_plane_fit_point_cloud()
-                #     self.add_point_array_to_point_cloud(plane_points)
             self.publish_point_cloud()
         self.visualize_markers_pub.publish(marker_array)
         if axes_array is not None:

@@ -3,9 +3,9 @@
 import sys
 
 import cv2
-import detection_node as dn
 import rospy
-import owlvit_detector as od
+from detection_node import DetectionNode
+from owlvit_detector import OwlViTObjectDetector
 
 if __name__ == "__main__":
     print("cv2.__version__ =", cv2.__version__)
@@ -14,11 +14,11 @@ if __name__ == "__main__":
 
     confidence_threshold = 0.08
 
-    detector = od.OwlViTObjectDetector(score_threshold=confidence_threshold)
+    detector = OwlViTObjectDetector(score_threshold=confidence_threshold)
     default_marker_name = "object"
     node_name = "DetectObjectsNode"
     topic_base_name = "objects"
-    node = dn.DetectionNode(detector, default_marker_name, node_name, topic_base_name)
+    node = DetectionNode(detector, default_marker_name, node_name, topic_base_name)
     node.main()
     try:
         rospy.spin()
