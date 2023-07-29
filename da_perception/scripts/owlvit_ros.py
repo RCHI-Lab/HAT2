@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import sys
-
 import cv2
 import numpy as np
 import rospy
@@ -11,7 +9,6 @@ import torch
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from transformers import OwlViTForObjectDetection, OwlViTProcessor
-from transformers.image_utils import ImageFeatureExtractionMixin
 
 
 class OwlViTRos:
@@ -69,7 +66,7 @@ class OwlViTRos:
                     "box": box,
                 },
             )
-        cv2.imshow(" window", cv2_img)
+        cv2.imshow("window", cv2_img)
         cv2.waitKey(3)
 
     def center_crop_to_square(self, image):
@@ -84,10 +81,7 @@ class OwlViTRos:
         x1 = (width - side_length) // 2
         x2 = x1 + side_length
 
-        # Perform the cropping operation
-        cropped_image = image[y1:y2, x1:x2]
-
-        return cropped_image
+        return image[y1:y2, x1:x2]
 
     def draw_detection(self, image, detection_dict):
         font_scale = 0.75

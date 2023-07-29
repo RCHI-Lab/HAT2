@@ -310,3 +310,4 @@ CATKIN_IGNORE
 
 *.ipynb
 *.pdf
+*.pth
