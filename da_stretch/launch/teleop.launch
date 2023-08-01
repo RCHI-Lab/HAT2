@@ -13,6 +13,13 @@
     <node name="kb_interface" pkg="da_interface" type="keyboard_interface.py" output="screen"
         required="true"
         if="$(eval interface == 'keyboard')" />
+    <group if="$(eval interface == 'hat')">
+        <node name="hat_interface" pkg="da_interface" type="hat_interface.py" output="screen"
+            required="true" />
+        <node name="mouse_publisher_node" pkg="hat_pkg" type="mouse_publisher_upgraded.py"
+            output="screen" />
+        <node name="gui" pkg="hat_pkg" type="gui_upgraded.py" output="screen" />
+    </group>
 
     <node name="stretch_controller" pkg="da_stretch" type="stretch_controller.py" />
 </launch>
