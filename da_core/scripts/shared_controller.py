@@ -12,12 +12,21 @@ from joint_state_listener import JointStateListener
 from stretch_ik_solver import IKSolver
 from typing_extensions import override
 
+# isort: split
 from da_core.msg import GoalBelief, GoalBeliefArray
+from std_msgs.msg import Int16
 
 
 class SharedController(ControllerBase):
     def __init__(
-        self, fixed_joints=(), constraint: Literal["hard", "soft", "none"] = "none", clamp=False, max_speed=0.5, soft_max_vel=0.05, use_cofidence=False
+        self,
+        da_enable_topic,
+        fixed_joints=(),
+        constraint: Literal["hard", "soft", "none"] = "none",
+        clamp=False,
+        max_speed=0.5,
+        soft_max_vel=0.05,
+        use_cofidence=False,
     ) -> None:
         super().__init__(uh_topic="/teleop_velocity_command")
         self._ik_solver = IKSolver()
@@ -28,9 +37,15 @@ class SharedController(ControllerBase):
         self.max_speed = max_speed
         self.soft_max_vel = soft_max_vel
         self.use_confidence = use_cofidence
-        self.goal_sub = rospy.Subscriber("/goal_beliefs", GoalBeliefArray, self.goal_beliefs_cb)
         self.goal_beliefs: dict[int, float] = {}
         self.sorted_goals: list[tuple[int, float]] = []
+        self.goal_sub = rospy.Subscriber("/goal_beliefs", GoalBeliefArray, self.goal_beliefs_cb)
+        self.enable_sub = rospy.Subscriber(da_enable_topic, Int16, self.da_enable_cb)
+        self.enabled = False
+
+    def da_enable_cb(self, msg: Int16):
+        assert msg.data in (0, 1)
+        self.enabled = bool(msg.data)
 
     def goal_beliefs_cb(self, msg: GoalBeliefArray) -> None:
         goal: GoalBelief
@@ -43,7 +58,7 @@ class SharedController(ControllerBase):
         if len(self.sorted_goals) < 2:
             return 1.0
         return self.sorted_goals[0][1] - self.sorted_goals[1][1]
-    
+
     @property
     def current_goal(self):
         if len(self.sorted_goals) == 0:
@@ -71,13 +86,17 @@ class SharedController(ControllerBase):
             if soft_joints := [i for i in range(8) if self.uh[i] != 0]:
                 ur[soft_joints] = np.clip(ur[soft_joints], -self.soft_max_vel, self.soft_max_vel)
         if self.use_confidence:
-            rospy.loginfo_throttle(0.5, f"goal: {self.current_goal}, confidence: {self.confidence:.3f}\r")
+            rospy.loginfo_throttle(
+                0.5, f"goal: {self.current_goal}, confidence: {self.confidence:.3f}\r"
+            )
             return self.confidence * ur + self.uh
         else:
             return ur + self.uh
 
     @override
     def step(self):
+        if self.enabled:
+            self._vel_cmder.pub_vel(self.uh)
         ur = self.auto_step()
         q_dot = self.combine(ur)
         self._vel_cmder.pub_vel(q_dot)
@@ -85,7 +104,9 @@ class SharedController(ControllerBase):
 
 if __name__ == "__main__":
     rospy.init_node("shared_controller")
-    ctrler = SharedController(fixed_joints=(), constraint="soft", use_cofidence=True)
+    ctrler = SharedController(
+        da_enable_topic="/da", fixed_joints=(), constraint="soft", use_cofidence=True
+    )
     r = rospy.Rate(30)
     rospy.sleep(0.5)
 

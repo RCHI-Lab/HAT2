@@ -10,7 +10,8 @@
         <node name="joy_interface" pkg="da_interface" type="joy_interface.py" required="true" />
         <node name="joy_node" pkg="joy" type="joy_node" required="true" />
     </group>
-    <node name="kb_interface" pkg="da_interface" type="keyboard_interface.py" output="screen" required="true"
+    <node name="kb_interface" pkg="da_interface" type="keyboard_interface.py" output="screen"
+        required="true"
         if="$(eval interface == 'keyboard')" />
     <node name="marker_manager" pkg="da_sim" type="marker_manager.py" required="true" />
     <node name="multi_goal_publisher" pkg="da_sim" type="multi_goal_publisher.py" required="true" />

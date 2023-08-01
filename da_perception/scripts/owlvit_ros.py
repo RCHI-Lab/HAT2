@@ -26,9 +26,9 @@ class OwlViTRos:
         self.model = self.model.to(self.device)
         self.model.eval()
 
-    def callback(self, data):
+    def callback(self, msg: Image):
         try:
-            self.latest_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            self.latest_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
         except CvBridgeError as e:
             print(e)
 

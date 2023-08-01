@@ -39,9 +39,11 @@ class JointStateListener:
 if __name__ == "__main__":
     rospy.init_node("joint_state_listener")
     listener = JointStateListener()
+    rate = rospy.Rate(10)
     while not rospy.is_shutdown():
         try:
             duration, q = listener.get_state()
             rospy.loginfo_throttle(1, f"{q}, {duration.to_sec()}s ago")
         except ValueError as e:
             rospy.loginfo_throttle(1, e)
+        rate.sleep()

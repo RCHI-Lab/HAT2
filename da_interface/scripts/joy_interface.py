@@ -25,6 +25,6 @@ class JoyconInterface:
 
 
 if __name__ == "__main__":
-    rospy.init_node("joint_state_listener")
+    rospy.init_node("joy_interface")
     interface = JoyconInterface()
     rospy.spin()

@@ -8,7 +8,7 @@ import rospy
 import tf2_ros
 from geometry_msgs.msg import TransformStamped
 from std_msgs.msg import Float64MultiArray
-from velocity_commander import SimVelocityCommander, RealVelocityCommander
+from velocity_commander import RealVelocityCommander, SimVelocityCommander
 
 
 class ControllerBase(abc.ABC):
@@ -18,7 +18,11 @@ class ControllerBase(abc.ABC):
             self.uh = np.zeros(8)
         self._tf_buffer = tf2_ros.Buffer()
         self._tf_listener = tf2_ros.TransformListener(self._tf_buffer)
-        self._vel_cmder = RealVelocityCommander()
+        self._vel_cmder = (
+            RealVelocityCommander()
+            if rospy.get_param("/use_real_robot", False)
+            else SimVelocityCommander()
+        )
         self.verbose = verbose
         rospy.on_shutdown(self.stop)
 
@@ -30,9 +34,10 @@ class ControllerBase(abc.ABC):
             q_dot = q_dot / length * self.max_speed
         return q_dot
 
-    def uh_cb(self, data: Float64MultiArray) -> None:
+    def uh_cb(self, msg: Float64MultiArray) -> None:
         """human input callback function"""
-        self.uh = np.array(data.data)
+        self.uh = np.array(msg.data)
+        assert len(self.uh) == 8, "human input should be 8 dimensional"
         if self.verbose:
             rospy.loginfo(f"received: {self.uh}")
 
