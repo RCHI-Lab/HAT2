@@ -14,7 +14,7 @@ import sys
 from select import select
 
 import rospy
-from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import Float64, Float64MultiArray
 
 if sys.platform == "win32":
     import msvcrt
@@ -45,16 +45,18 @@ CTRL-C to quit
 """
 
 moveBindings = {
-    "w": (1, 0, 0, 0, 0),
-    "s": (-1, 0, 0, 0, 0),
-    "a": (0, 1, 0, 0, 0),
-    "d": (0, -1, 0, 0, 0),
-    "i": (0, 0, 1, 0, 0),
-    "k": (0, 0, -1, 0, 0),
-    "j": (0, 0, 0, -1, 0),
-    "l": (0, 0, 0, 1, 0),
-    "u": (0, 0, 0, 0, 1),
-    "o": (0, 0, 0, 0, -1),
+    "w": (1, 0, 0, 0, 0, 0),
+    "s": (-1, 0, 0, 0, 0, 0),
+    "a": (0, 1, 0, 0, 0, 0),
+    "d": (0, -1, 0, 0, 0, 0),
+    "i": (0, 0, 1, 0, 0, 0),
+    "k": (0, 0, -1, 0, 0, 0),
+    "j": (0, 0, 0, -1, 0, 0),
+    "l": (0, 0, 0, 1, 0, 0),
+    "u": (0, 0, 0, 0, 1, 0),
+    "o": (0, 0, 0, 0, -1, 0),
+    "f": (0, 0, 0, 0, 0, 1),
+    "r": (0, 0, 0, 0, 0, -1),
 }
 
 speedBindings = {
@@ -71,6 +73,9 @@ class PublishThread(threading.Thread):
         self.publisher = rospy.Publisher(
             "/teleop_velocity_command", Float64MultiArray, queue_size=1
         )
+        self.gripper_publisher = rospy.Publisher(
+            "/stretch_controller/gripper_cmd", Float64, queue_size=1
+        )
         self.x = 0.0
         self.th = 0.0
         self.lift = 0.0
@@ -78,6 +83,7 @@ class PublishThread(threading.Thread):
         self.wrist = 0.0
         self.speed = 0.0
         self.turn = 0.0
+        self.gripper = 0.0
         self.condition = threading.Condition()
         self.done = False
 
@@ -97,13 +103,14 @@ class PublishThread(threading.Thread):
         if rospy.is_shutdown():
             raise RuntimeError("Got shutdown request before subscribers connected")
 
-    def update(self, x, th, lift, arm_ext, wrist, speed, turn):
+    def update(self, x, th, lift, arm_ext, wrist, gripper, speed, turn):
         self.condition.acquire()
         self.x = x
         self.th = th
         self.lift = lift
         self.arm_ext = arm_ext
         self.wrist = wrist
+        self.gripper = gripper
         self.speed = speed
         self.turn = turn
         # Notify publish thread that we have a new message.
@@ -112,7 +119,7 @@ class PublishThread(threading.Thread):
 
     def stop(self):
         self.done = True
-        self.update(0, 0, 0, 0, 0, 0, 0)
+        self.update(0, 0, 0, 0, 0, 0, 0, 0)
         self.join()
 
     def run(self):
@@ -127,6 +134,7 @@ class PublishThread(threading.Thread):
             lift = self.lift * self.speed
             single_arm_ext = self.arm_ext * self.speed / 4
             wrist = self.wrist * self.turn
+            gripper = self.gripper * self.speed
 
             self.condition.release()
 
@@ -134,9 +142,11 @@ class PublishThread(threading.Thread):
             self.publisher.publish(
                 Float64MultiArray(data=[x, th, lift, *[single_arm_ext] * 4, wrist])
             )
+            self.gripper_publisher.publish(data=gripper)
 
         # Publish stop message when thread exits.
         self.publisher.publish(Float64MultiArray(data=[0] * 8))
+        self.gripper_publisher.publish(data=0)
 
 
 def getKey(settings, timeout):
@@ -186,11 +196,12 @@ if __name__ == "__main__":
     arm_ext = 0
     wrist = 0
     th = 0.0
+    gripper = 0
     status = 0
 
     try:
         pub_thread.wait_for_subscribers()
-        pub_thread.update(x, th, lift, arm_ext, wrist, speed, turn)
+        pub_thread.update(x, th, lift, arm_ext, wrist, gripper, speed, turn)
 
         print(msg)
         print(vels(speed, turn))
@@ -202,6 +213,7 @@ if __name__ == "__main__":
                 lift = moveBindings[key][2]
                 arm_ext = moveBindings[key][3]
                 wrist = moveBindings[key][4]
+                gripper = moveBindings[key][5]
             elif key in speedBindings.keys():
                 speed = min(speed_limit, speed * speedBindings[key][0])
                 turn = min(turn_limit, turn * speedBindings[key][1])
@@ -218,11 +230,11 @@ if __name__ == "__main__":
                 # stopped.
                 if key == "" and x == 0 and th == 0 and lift == 0 and arm_ext == 0 and wrist == 0:
                     continue
-                x, th, lift, arm_ext, wrist = [0] * 5
+                x, th, lift, arm_ext, wrist, gripper = [0] * 6
                 if key == "\x03":
                     break
 
-            pub_thread.update(x, th, lift, arm_ext, wrist, speed, turn)
+            pub_thread.update(x, th, lift, arm_ext, wrist, gripper, speed, turn)
 
     except Exception as e:
         print(e)
