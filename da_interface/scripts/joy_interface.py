@@ -9,14 +9,12 @@ from std_msgs.msg import Float64MultiArray
 
 class JoyconInterface:
     def __init__(self) -> None:
-        rospy.Subscriber("/joy", Joy, self.joint_state_cb)
-        self.publisher = rospy.Publisher(
-            "/teleop_velocity_command", Float64MultiArray, queue_size=1
-        )
+        rospy.Subscriber("/joy", Joy, self.interface_cb)
+        self.publisher = rospy.Publisher("teleop_velocity_command", Float64MultiArray, queue_size=1)
         self.axis_assign = [3, 2, 1, 0, 4]  # base trans, base turn, lift, arm, wrist
         self.axis_factors = [0.25, 0.75, 1, -0.25, 3]
 
-    def joint_state_cb(self, msg: Joy) -> None:
+    def interface_cb(self, msg: Joy) -> None:
         vel = [0] * 5
         print(msg.axes)
         for idx in range(5):

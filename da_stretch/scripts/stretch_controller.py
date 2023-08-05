@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import hello_helpers.hello_misc as hm
 import rospy
-from std_msgs.msg import Float64, Float64MultiArray
 from geometry_msgs.msg import Twist, Vector3
 from sensor_msgs.msg import JointState
-import hello_helpers.hello_misc as hm
+from std_msgs.msg import Float64, Float64MultiArray
 
 
 class StretchController(hm.HelloNode):
@@ -26,7 +26,7 @@ class StretchController(hm.HelloNode):
                 "joint_arm": sum(q_dot[3:7]),
                 "joint_wrist_yaw": q_dot[7],
             },
-            # return_before_done=True,
+            return_before_done=True,
         )
 
     def gripper_cb(self, msg: Float64):
@@ -43,11 +43,12 @@ class StretchController(hm.HelloNode):
         hm.HelloNode.main(
             self, "stretch_controller", "stretch_controller", wait_for_first_pointcloud=False
         )
-        rospy.Subscriber("/stretch_controller/joint_cmd", Float64MultiArray, self.joint_cb)
-        rospy.Subscriber("/stretch_controller/gripper_cmd", Float64, self.gripper_cb)
-        self.base_vel_pub = rospy.Publisher("/stretch/cmd_vel", Twist, queue_size=1)
-        js_msg = rospy.wait_for_message("/joint_states", JointState)
+        js_msg = rospy.wait_for_message("joint_states", JointState)
         self.gripper = js_msg.position[js_msg.name.index("joint_gripper_finger_left")]
+        rospy.Subscriber("stretch_controller/joint_cmd", Float64MultiArray, self.joint_cb)
+        rospy.Subscriber("stretch_controller/gripper_cmd", Float64, self.gripper_cb)
+        self.base_vel_pub = rospy.Publisher("stretch/cmd_vel", Twist, queue_size=1)
+        rospy.logerr("stretch controller started")
         rospy.spin()
 
 

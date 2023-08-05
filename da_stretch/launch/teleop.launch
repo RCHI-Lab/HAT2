@@ -7,42 +7,15 @@
     <node name="teleop_controller" pkg="da_core" type="teleop_controller.py" respawn="true"
         output="screen" />
 
-    <group if="$(eval interface == 'joy')">
-        <node name="joy_interface" pkg="da_interface" type="joy_interface.py" required="true" />
-        <node name="joy_node" pkg="joy" type="joy_node" required="true" />
-    </group>
-    <node name="kb_interface" pkg="da_interface" type="keyboard_interface.py" output="screen"
-        required="true"
-        if="$(eval interface == 'keyboard')" />
-    <group if="$(eval interface == 'hat')">
-        <node name="hat_interface" pkg="da_interface" type="hat_interface.py" output="screen"
-            required="true" />
-        <node name="mouse_publisher_node" pkg="hat_pkg" type="mouse_publisher_upgraded.py"
-            output="screen" />
-        <node name="gui" pkg="hat_pkg" type="gui_upgraded.py" output="screen" />
-    </group>
-
-    <!-- <node name="stretch_controller" pkg="da_stretch" type="stretch_controller.py"
-    output="screen" /> -->
-    <node name="stretch_controller" pkg="da_stretch" type="stretch_controller.py" />
-
-    <!-- STRETCH DRIVER -->
-    <param name="/stretch_driver/broadcast_odom_tf" type="bool" value="false" />
-    <param name="/stretch_driver/fail_out_of_range_goal" type="bool" value="false" />
-    <include file="$(find stretch_core)/launch/stretch_driver.launch" pass_all_args="true">
-        <arg name="mode" value="velocity" />
+    <include file="$(find da_interface)/launch/interface.launch">
+        <arg name="interface" value="$(arg interface)" />
     </include>
-    <node pkg="rosservice" type="rosservice" name="set_stretch_driver_log_level"
-        args="call --wait /stretch_driver/set_logger_level '{logger: 'rosout', level: 'warn'}'" />
-    <!-- -->
 
-    <group if="$(arg lidar)">
-        <!-- LASER RANGE FINDER -->
-        <include file="$(find stretch_core)/launch/rplidar.launch" />
-        <!-- -->
+    <node name="stretch_controller" pkg="da_stretch" type="stretch_controller.py"
+        output="screen" />
 
-        <!-- LASER SCAN MATCHER FOR ODOMETRY -->
-        <include file="$(find stretch_core)/launch/stretch_scan_matcher.launch" />
-        <!-- -->
-    </group>
+    <include file="$(find da_stretch)/launch/stretch_bringup.launch">
+        <arg name="lidar" value="$(arg lidar)" />
+    </include>
+
 </launch>

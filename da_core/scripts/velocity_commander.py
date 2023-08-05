@@ -9,10 +9,11 @@ from std_msgs.msg import Float64MultiArray
 
 class RealVelocityCommander:
     def __init__(self) -> None:
-        self.pub = rospy.Publisher("/stretch_controller/joint_cmd", Float64MultiArray, queue_size=1)
+        self.pub = rospy.Publisher("stretch_controller/joint_cmd", Float64MultiArray, queue_size=1)
 
     def pub_vel(self, q_dot: Sequence[float]):
         assert len(q_dot) == 8
+        rospy.logdebug_throttle(1, f"velocity commander: {q_dot}")
         self.pub.publish(data=q_dot)
 
     def stop(self):
@@ -23,10 +24,10 @@ class RealVelocityCommander:
 class SimVelocityCommander:
     def __init__(self) -> None:
         self.arm_vel_pub = rospy.Publisher(
-            "/stretch_arm_controller/command", Float64MultiArray, queue_size=1
+            "stretch_arm_controller/command", Float64MultiArray, queue_size=1
         )
         self.base_vel_pub = rospy.Publisher(
-            "/stretch_diff_drive_controller/cmd_vel", Twist, queue_size=1
+            "stretch_diff_drive_controller/cmd_vel", Twist, queue_size=1
         )
 
     def pub_vel(self, q_dot: Sequence[float]):

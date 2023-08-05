@@ -13,9 +13,7 @@ from velocity_commander import RealVelocityCommander, SimVelocityCommander
 
 class ControllerBase(abc.ABC):
     def __init__(self, uh_topic, verbose=False) -> None:
-        if uh_topic is not None:
-            rospy.Subscriber(uh_topic, Float64MultiArray, self.uh_cb)
-            self.uh = np.zeros(8)
+        self.verbose = verbose
         self._tf_buffer = tf2_ros.Buffer()
         self._tf_listener = tf2_ros.TransformListener(self._tf_buffer)
         self._vel_cmder = (
@@ -23,7 +21,9 @@ class ControllerBase(abc.ABC):
             if rospy.get_param("/use_real_robot", False)
             else SimVelocityCommander()
         )
-        self.verbose = verbose
+        if uh_topic is not None:
+            rospy.Subscriber(uh_topic, Float64MultiArray, self.uh_cb)
+            self.uh = np.zeros(8)
         rospy.on_shutdown(self.stop)
 
     def clamp_qd(self, q_dot):

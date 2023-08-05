@@ -15,11 +15,12 @@ from typing_extensions import override
 
 
 class TeleopController(ControllerBase):
-    def __init__(self, uh_topic="/teleop_velocity_command") -> None:
+    def __init__(self, uh_topic="teleop_velocity_command") -> None:
         super().__init__(uh_topic)
 
     @override
     def step(self):
+        rospy.logdebug_throttle(1, f"teleop ctrler send: {self.uh}")
         self._vel_cmder.pub_vel(self.uh)
 
 
