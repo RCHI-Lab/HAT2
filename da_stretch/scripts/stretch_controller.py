@@ -48,7 +48,7 @@ class StretchController(hm.HelloNode):
         rospy.Subscriber("stretch_controller/joint_cmd", Float64MultiArray, self.joint_cb)
         rospy.Subscriber("stretch_controller/gripper_cmd", Float64, self.gripper_cb)
         self.base_vel_pub = rospy.Publisher("stretch/cmd_vel", Twist, queue_size=1)
-        rospy.logerr("stretch controller started")
+        rospy.logdebug("stretch controller started")
         rospy.spin()
 
 

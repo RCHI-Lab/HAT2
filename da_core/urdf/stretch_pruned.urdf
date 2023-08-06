@@ -107,7 +107,7 @@
     <parent link="link_base_revolution"/>
     <child link="link_mast"/>
     <axis xyz="1. 0. 0."/>
-    <origin xyz="-0.067 0.135 0.0284" rpy="1.5708 0.0 4.8006e-17"/>
+    <origin xyz="-0.07009055762807098 0.13159786057784964 0.028302116135615125" rpy="1.5648678330247587 0.013954114010035212 -0.02346559894719587"/>
   </joint>
   <joint name="joint_lift" type="prismatic">
     <limit effort="100.0" velocity="1.0" lower="0.0" upper="1.1"/>
@@ -120,7 +120,7 @@
     <parent link="link_lift"/>
     <child link="link_arm_l4"/>
     <axis xyz="1. 0. 0."/>
-    <origin xyz="-0.2547 0.0 0.0" rpy="1.5708 2.4721e-15 -1.5708"/>
+    <origin xyz="-0.251582752247285 -0.006070296440143875 -0.005254623139652845" rpy="1.5664162057374356 0.059620207701978734 -1.5661623604639134"/>
   </joint>
   <joint name="joint_arm_l3" type="prismatic">
     <limit effort="100.0" velocity="1.0" lower="0.0" upper="0.13"/>

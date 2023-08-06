@@ -1,13 +1,4 @@
 <launch>
-    <arg name="real_robot" default="false" />
-    <group if="$(arg real_robot)">
-        <param name="/use_real_robot" type="bool" value="true" />
-        <node name="stretch_controller" pkg="da_stretch" type="stretch_controller.py" />
-
-        <param name="/stretch_driver/broadcast_odom_tf" type="bool" value="true" />
-        <param name="/stretch_driver/fail_out_of_range_goal" type="bool" value="false" />
-        <include file="$(find stretch_core)/launch/stretch_driver.launch" pass_all_args="true" />
-    </group>
     <node name="auto_reach_controller" pkg="da_core" type="auto_reach_controller.py" />
     <node name="single_goal_manager" pkg="da_sim" type="single_goal_manager.py" />
 </launch>
