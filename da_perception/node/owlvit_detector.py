@@ -1,5 +1,3 @@
-#!/home/hat/da_ws/src/driver_assistance/da_perception/.venv/bin/python3
-
 import cv2
 import torch
 from transformers import OwlViTForObjectDetection, OwlViTProcessor
@@ -66,6 +64,7 @@ class OwlViTObjectDetector:
             return y_out
 
         results = []
+        idx = 0
         for score, box, label in zip(scores, boxes, labels):
             if score < self.score_threshold:
                 continue
@@ -89,16 +88,16 @@ class OwlViTObjectDetector:
 
             corner_box = (x_min, y_min, x_max, y_max)
 
-            print(f"{self.queries[label]} detected, score: {score:.3f}")
-
             results.append(
                 {
+                    "id": idx,
                     "class_id": label,
                     "label": self.queries[label],
                     "confidence": score,
                     "box": corner_box,
                 }
             )
+            idx += 1
 
         output_image = None
         if draw_output:

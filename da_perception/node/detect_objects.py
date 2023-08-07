@@ -15,9 +15,9 @@ if __name__ == "__main__":
     confidence_threshold = 0.08
 
     detector = OwlViTObjectDetector(score_threshold=confidence_threshold)
-    default_marker_name = "object"
+    default_marker_name = "detection"
     node_name = "DetectObjectsNode"
-    topic_base_name = "objects"
+    topic_base_name = "detections"
     node = DetectionNode(detector, default_marker_name, node_name, topic_base_name)
     node.main()
     try:

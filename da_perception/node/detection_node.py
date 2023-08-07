@@ -6,8 +6,10 @@ import cv2
 import message_filters
 import rospy
 from cv_bridge import CvBridge, CvBridgeError
+from da_core.msg import GoalBelief, GoalBeliefArray
 from detection_2d_to_3d import detections_2d_to_3d
 from detection_ros_markers import DetectionBoxMarkerCollection
+from detection_tfs import DetectionTFs
 from sensor_msgs import point_cloud2
 from sensor_msgs.msg import CameraInfo, Image, PointCloud2, PointField
 from std_msgs.msg import Header
@@ -36,6 +38,8 @@ class DetectionNode:
         self.detector = detector
 
         self.marker_collection = DetectionBoxMarkerCollection(default_marker_name)
+
+        self.detection_tfs = DetectionTFs(tf_prefix=default_marker_name)
 
         self.topic_base_name = topic_base_name
         self.node_name = node_name
@@ -86,6 +90,9 @@ class DetectionNode:
         detections_2d, output_image = self.detector.apply_to_image(
             detection_box_image, draw_output=debug_output, crop=center_crop
         )
+        for detection in detections_2d:
+            rospy.logdebug(f"{detection['label']} detected, score: {detection['confidence']:.3f}")
+
         if debug_output:
             print("DetectionNode.image_callback: processed image with deep network!")
             print("DetectionNode.image_callback: output_image.shape =", output_image.shape)
@@ -107,6 +114,7 @@ class DetectionNode:
             detections_3d = self.modify_3d_detections(detections_3d)
 
         self.marker_collection.update(detections_3d, self.rgb_image_timestamp)
+        self.detection_tfs.update(detections_3d, self.rgb_image_timestamp)
 
         marker_array = self.marker_collection.get_ros_marker_array()
         include_axes = True
@@ -126,6 +134,8 @@ class DetectionNode:
         self.visualize_markers_pub.publish(marker_array)
         if axes_array is not None:
             self.visualize_axes_pub.publish(axes_array)
+
+        self.publish_beliefs(detections_2d)
 
     def add_to_point_cloud(self, x_mat, y_mat, z_mat, mask):
         points = [
@@ -159,6 +169,16 @@ class DetectionNode:
         self.visualize_point_cloud_pub.publish(point_cloud)
         self.all_points = []
 
+    def publish_beliefs(self, detections_2d):
+        self.goal_beliefs_pub.publish(
+            GoalBeliefArray(
+                goals=[
+                    GoalBelief(detection["id"], detection["confidence"])
+                    for detection in detections_2d
+                ]
+            )
+        )
+
     def main(self):
         rospy.init_node(self.node_name)
         name = rospy.get_name()
@@ -188,4 +208,8 @@ class DetectionNode:
         )
         self.visualize_point_cloud_pub = rospy.Publisher(
             f"/{self.topic_base_name}/point_cloud2", PointCloud2, queue_size=1
+        )
+
+        self.goal_beliefs_pub = rospy.Publisher(
+            f"/{self.topic_base_name}/goal_beliefs", GoalBeliefArray, queue_size=1
         )
