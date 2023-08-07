@@ -28,7 +28,7 @@ class StretchController(hm.HelloNode):
             },
             return_before_done=True,
         )
-        
+
     def stop(self):
         self.base_vel_pub.publish(Twist(linear=Vector3(0, 0, 0), angular=Vector3(0, 0, 0)))
         self.move_at_speed(

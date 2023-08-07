@@ -2,8 +2,9 @@ import abc
 
 import rospy
 import tf2_ros
-from geometry_msgs.msg import Quaternion, Transform, TransformStamped, Vector3
+from geometry_msgs.msg import Point, Quaternion, Transform, TransformStamped, Vector3
 from std_msgs.msg import Header, UInt32MultiArray
+from tf2_geometry_msgs import PointStamped
 
 
 class GoalPublisherBase(abc.ABC):
@@ -11,6 +12,8 @@ class GoalPublisherBase(abc.ABC):
         self.goal_topic = goal_topic
         self.goal_pub = rospy.Publisher(goal_topic, UInt32MultiArray, queue_size=2, latch=True)
         self.tf_br = tf2_ros.TransformBroadcaster()
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
         self.tf_list = []
         self.goal_ids = []
         self.tf_prefix = tf_prefix
@@ -27,11 +30,16 @@ class GoalPublisherBase(abc.ABC):
         box_3d = detection["box_3d"]
         if box_3d is not None:
             center = box_3d["center_xyz"]
-        return TransformStamped(
+        point_camera = PointStamped(
             header=Header(stamp=timestep, frame_id="camera_color_optical_frame"),
+            point=Point(x=center[0], y=center[1], z=center[2]),
+        )
+        point_odom: PointStamped = self.tf_buffer.transform(point_camera, "odom")
+        return TransformStamped(
+            header=Header(stamp=timestep, frame_id="odom"),
             child_frame_id=f"{self.tf_prefix}{id}",
             transform=Transform(
-                translation=Vector3(*center),
+                translation=Vector3(point_odom.point.x, point_odom.point.y, point_odom.point.z),
                 rotation=Quaternion(0, 0, 0, 1),
             ),
         )

@@ -38,9 +38,6 @@ class DetectionNode:
         self.detector = detector
 
         self.marker_collection = DetectionBoxMarkerCollection(default_marker_name)
-
-        self.detection_tfs = SingleGoalPublisher()
-
         self.topic_base_name = topic_base_name
         self.node_name = node_name
         self.min_box_side_m = min_box_side_m
@@ -114,7 +111,7 @@ class DetectionNode:
             detections_3d = self.modify_3d_detections(detections_3d)
 
         self.marker_collection.update(detections_3d, self.rgb_image_timestamp)
-        self.detection_tfs.update(detections_3d, self.rgb_image_timestamp)
+        self.goal_publisher.update(detections_3d, self.rgb_image_timestamp)
 
         marker_array = self.marker_collection.get_ros_marker_array()
         include_axes = True
@@ -183,6 +180,8 @@ class DetectionNode:
         rospy.init_node(self.node_name)
         name = rospy.get_name()
         rospy.loginfo("{0} started".format(name))
+
+        self.goal_publisher = SingleGoalPublisher()
 
         self.rgb_topic_name = "/camera/color/image_raw"  #'/camera/infra1/image_rect_raw'
         self.rgb_image_subscriber = message_filters.Subscriber(self.rgb_topic_name, Image)
