@@ -23,7 +23,9 @@ class AutoReachController(ControllerBase):
     def step(self):
         dur, q = self._jnt_state_listener.get_state()
         J_pinv = self._ik_solver.solve_J_pinv(q, fixed_joints=self.fixed_joints, only_trans=True)
-        err = np.array(self.get_err(target_frame="goal0"))
+        err = self.get_err(target_frame="goal0")
+        if err is None:
+            return
         q_dot = J_pinv @ err[:3]
         if self.clamp:
             q_dot = self.clamp_qd(q_dot)

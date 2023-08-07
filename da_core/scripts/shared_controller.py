@@ -40,8 +40,10 @@ class SharedController(ControllerBase):
         self.goal_beliefs: dict[int, float] = {}
         self.sorted_goals: list[tuple[int, float]] = []
         self.goal_sub = rospy.Subscriber("/goal_beliefs", GoalBeliefArray, self.goal_beliefs_cb)
-        self.enable_sub = rospy.Subscriber(da_enable_topic, Int16, self.da_enable_cb)
-        self.enabled = False
+        self.enabled = True
+        if rospy.get_param("interface") == "hat":
+            self.enable_sub = rospy.Subscriber(da_enable_topic, Int16, self.da_enable_cb)
+            self.enabled = False
 
     def da_enable_cb(self, msg: Int16):
         assert msg.data in (0, 1)
@@ -56,7 +58,7 @@ class SharedController(ControllerBase):
     @property
     def confidence(self):
         if len(self.sorted_goals) < 2:
-            return 1.0
+            return self.sorted_goals[0][1]
         return self.sorted_goals[0][1] - self.sorted_goals[1][1]
 
     @property
@@ -74,17 +76,21 @@ class SharedController(ControllerBase):
             J_pinv = self._ik_solver.solve_J_pinv(
                 q, fixed_joints=self.fixed_joints, only_trans=True
             )
-        err = np.array(self.get_err(target_frame=f"goal{self.current_goal}"))
+        err = self.get_err(target_frame=f"goal{self.current_goal}")
+        if err is None:
+            return np.zeros(8)
         q_dot = J_pinv @ err[:3]
         return self.clamp_qd(q_dot) if self.clamp else q_dot
 
     def combine(self, ur):
         if (not self.use_confidence) and np.linalg.norm(self.uh) <= 0:
             return np.zeros(ur.shape)
+
         if self.constraint == "soft":
             # clip the joint velocity where uh is not 0
             if soft_joints := [i for i in range(8) if self.uh[i] != 0]:
                 ur[soft_joints] = np.clip(ur[soft_joints], -self.soft_max_vel, self.soft_max_vel)
+
         if self.use_confidence:
             rospy.loginfo_throttle(
                 0.5, f"goal: {self.current_goal}, confidence: {self.confidence:.3f}\r"

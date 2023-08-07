@@ -203,6 +203,7 @@ def detections_2d_to_3d(
         detections_3d.append(
             {
                 "id": h.get("id"),
+                "confidence": h.get("confidence"),
                 "box_3d": box_3d,
                 "box_2d": box_2d,
                 "label": label,

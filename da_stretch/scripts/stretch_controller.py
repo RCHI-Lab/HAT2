@@ -28,6 +28,17 @@ class StretchController(hm.HelloNode):
             },
             return_before_done=True,
         )
+        
+    def stop(self):
+        self.base_vel_pub.publish(Twist(linear=Vector3(0, 0, 0), angular=Vector3(0, 0, 0)))
+        self.move_at_speed(
+            {
+                "joint_lift": 0,
+                "joint_arm": 0,
+                "joint_wrist_yaw": 0,
+            },
+            return_before_done=True,
+        )
 
     def gripper_cb(self, msg: Float64):
         # divide or multiply by some scaling factor that you can find through testing
@@ -43,6 +54,7 @@ class StretchController(hm.HelloNode):
         hm.HelloNode.main(
             self, "stretch_controller", "stretch_controller", wait_for_first_pointcloud=False
         )
+        rospy.on_shutdown(self.stop)
         js_msg = rospy.wait_for_message("joint_states", JointState)
         self.gripper = js_msg.position[js_msg.name.index("joint_gripper_finger_left")]
         rospy.Subscriber("stretch_controller/joint_cmd", Float64MultiArray, self.joint_cb)

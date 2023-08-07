@@ -1,6 +1,8 @@
 <launch>
     <arg name="interface" default="keyboard" />
 
+    <param name="interface" type="string" value="$(arg interface)" />
+
     <group if="$(eval interface == 'joy')">
         <node name="joy_interface" pkg="da_interface" type="joy_interface.py" required="true" />
         <node name="joy_node" pkg="joy" type="joy_node" required="true" />

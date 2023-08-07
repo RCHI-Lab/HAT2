@@ -56,13 +56,15 @@ class ControllerBase(abc.ABC):
                 base_frame, "link_grasp_center", rospy.Time(), timeout=rospy.Duration(secs=5)
             )
             ee_pos = ee_transform.transform.translation
-            return (
-                target_pos.x - ee_pos.x,
-                target_pos.y - ee_pos.y,
-                target_pos.z - ee_pos.z,
-                0,
-                0,
-                0,
+            return np.array(
+                [
+                    target_pos.x - ee_pos.x,
+                    target_pos.y - ee_pos.y,
+                    target_pos.z - ee_pos.z,
+                    0,
+                    0,
+                    0,
+                ]
             )
         except (
             tf2_ros.LookupException,

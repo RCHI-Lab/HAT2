@@ -9,7 +9,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from da_core.msg import GoalBelief, GoalBeliefArray
 from detection_2d_to_3d import detections_2d_to_3d
 from detection_ros_markers import DetectionBoxMarkerCollection
-from detection_tfs import DetectionTFs
+from goal_publisher import SingleGoalPublisher
 from sensor_msgs import point_cloud2
 from sensor_msgs.msg import CameraInfo, Image, PointCloud2, PointField
 from std_msgs.msg import Header
@@ -39,7 +39,7 @@ class DetectionNode:
 
         self.marker_collection = DetectionBoxMarkerCollection(default_marker_name)
 
-        self.detection_tfs = DetectionTFs(tf_prefix=default_marker_name)
+        self.detection_tfs = SingleGoalPublisher()
 
         self.topic_base_name = topic_base_name
         self.node_name = node_name
@@ -91,7 +91,7 @@ class DetectionNode:
             detection_box_image, draw_output=debug_output, crop=center_crop
         )
         for detection in detections_2d:
-            rospy.logdebug(f"{detection['label']} detected, score: {detection['confidence']:.3f}")
+            rospy.loginfo(f"{detection['label']} detected, score: {detection['confidence']:.3f}")
 
         if debug_output:
             print("DetectionNode.image_callback: processed image with deep network!")
