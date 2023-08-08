@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     confidence_threshold = 0.08
 
-    detector = OwlViTObjectDetector(score_threshold=confidence_threshold)
+    detector = OwlViTObjectDetector(queries=["blue cup"], score_threshold=confidence_threshold)
     default_marker_name = "detection"
     node_name = "DetectObjectsNode"
     topic_base_name = "detections"

@@ -20,7 +20,7 @@
 
     <!-- VISUALIZE DETECTION -->
     <node name="rviz" pkg="rviz" type="rviz" output="screen"
-        args="-d $(find stretch_deep_perception)/rviz/object_detection.rviz" />
+        args="-d $(find da_perception)/rviz/object_detection.rviz" />
     <!-- -->
 
 </launch>

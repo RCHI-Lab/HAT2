@@ -63,7 +63,9 @@ def bounding_box_2d_to_3d(points_array, box_2d, camera_matrix, head_to_camera_ma
 
     num_points = points_array.shape[0]
     if num_points >= 1:
-        box_depth = np.median(points_array, axis=0)[2]
+        # there's issue with the points being 0 (hollow)
+        points_z = points_array[:,2]
+        box_depth = np.median(points_z[points_z > 0])
     else:
         print(
             "WARNING: No reasonable depth image points available in the detected rectangle. No work around currently implemented for lack of depth estimate."

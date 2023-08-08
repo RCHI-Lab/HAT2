@@ -10,7 +10,7 @@
         <arg name="mode" value="$(arg mode)" />
     </include>
     <node pkg="rosservice" type="rosservice" name="set_stretch_driver_log_level"
-        args="call --wait /stretch_driver/set_logger_level '{logger: 'rosout', level: 'warn'}'" />
+        args="call --wait /stretch_driver/set_logger_level ros 'warn'" />
     <!-- -->
 
     <group if="$(arg lidar)">

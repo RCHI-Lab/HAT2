@@ -3,10 +3,12 @@
 
     <param name="/use_real_robot" type="bool" value="true" />
 
-    <node name="auto_reach_controller" pkg="da_core" type="auto_reach_controller.py" />
+    <node name="shared_controller" pkg="da_core" type="shared_controller.py" />
 
     <node name="stretch_controller" pkg="da_stretch" type="stretch_controller.py"
         output="screen" />
+
+    <node name="intent_recognizer" pkg="da_core" type="intent_recognizer.py" />
 
     <!-- CONTROL INTERFACE -->
     <include file="$(find da_interface)/launch/interface.launch">
