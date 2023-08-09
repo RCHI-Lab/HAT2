@@ -5,7 +5,10 @@
 
     <group if="$(eval interface == 'joy')">
         <node name="joy_interface" pkg="da_interface" type="joy_interface.py" required="true" />
-        <node name="joy_node" pkg="joy" type="joy_node" required="true" />
+        <node name="joy_node" pkg="joy" type="joy_node" required="true">
+            <param name="dev" type="string" value="/dev/input/js1" />
+            <param name="autorepeat_rate" type="double" value="30.0" />
+        </node>
     </group>
     <node name="kb_interface" pkg="da_interface" type="keyboard_interface.py" output="screen"
         required="true"
