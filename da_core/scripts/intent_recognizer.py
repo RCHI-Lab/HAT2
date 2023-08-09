@@ -28,11 +28,12 @@ class IntentRecognizer(abc.ABC):
             self.wait_for_uh(uh_topic)
         self.wait_for_ids(perception_topic)
 
-    def wait_for_ids(self, perception_topic) -> None:
+    def wait_for_ids(self, perception_topic: str) -> None:
         rospy.loginfo(f"waiting for message from {perception_topic} topic")
         msg = rospy.wait_for_message(perception_topic, UInt32MultiArray)
         # wait for tfs to be published
         for id in msg.data:
+            # TODO use wait for transform
             self._tf_buffer.lookup_transform(
                 "link_grasp_center", f"goal{id}", rospy.Time(), rospy.Duration(5)
             )
@@ -42,7 +43,7 @@ class IntentRecognizer(abc.ABC):
             if id not in self._goal_beliefs:
                 self._goal_beliefs[id] = 0
 
-    def wait_for_uh(self, uh_topic) -> None:
+    def wait_for_uh(self, uh_topic: str) -> None:
         rospy.loginfo(f"waiting for message from {uh_topic} topic")
         rospy.wait_for_message(uh_topic, Float64MultiArray)
 
@@ -56,7 +57,7 @@ class IntentRecognizer(abc.ABC):
             assert 0 <= self._goal_beliefs[id] <= 1
 
     @abc.abstractmethod
-    def calculate_single_belief(self, id) -> None:
+    def calculate_single_belief(self, id: int) -> None:
         """calculate a single goal's belief"""
         pass
 
@@ -69,7 +70,7 @@ class IntentRecognizer(abc.ABC):
 
 
 class DistanceIR(IntentRecognizer):
-    def calculate_single_belief(self, id) -> None:
+    def calculate_single_belief(self, id: int) -> None:
         if id not in self._goal_beliefs:
             raise ValueError(f"goal id {id} not found")
 

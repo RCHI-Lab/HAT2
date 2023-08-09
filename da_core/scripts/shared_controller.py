@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from contextlib import suppress
-from typing import Literal
+from typing import Literal, Sequence
 
 import numpy as np
 import rospy
@@ -20,15 +20,16 @@ from std_msgs.msg import Int16
 class SharedController(ControllerBase):
     def __init__(
         self,
-        da_enable_topic,
-        fixed_joints=(),
+        uh_topic: str,
+        da_enable_topic: str,
+        fixed_joints: Sequence[int],
         constraint: Literal["hard", "soft", "none"] = "none",
         clamp=False,
         max_speed=0.5,
         soft_max_vel=0.05,
-        use_cofidence=False,
+        use_confidence=False,
     ) -> None:
-        super().__init__(uh_topic="/teleop_velocity_command")
+        super().__init__(uh_topic)
         self._ik_solver = IKSolver()
         self._jnt_state_listener = JointStateListener()
         self.fixed_joints = set(fixed_joints)
@@ -36,7 +37,7 @@ class SharedController(ControllerBase):
         self.clamp = clamp
         self.max_speed = max_speed
         self.soft_max_vel = soft_max_vel
-        self.use_confidence = use_cofidence
+        self.use_confidence = use_confidence
         self.goal_beliefs: dict[int, float] = {}
         self.sorted_goals: list[tuple[int, float]] = []
         self.goal_sub = rospy.Subscriber("/goal_beliefs", GoalBeliefArray, self.goal_beliefs_cb)
@@ -45,7 +46,7 @@ class SharedController(ControllerBase):
             self.enable_sub = rospy.Subscriber(da_enable_topic, Int16, self.da_enable_cb)
             self.enabled = False
 
-    def da_enable_cb(self, msg: Int16):
+    def da_enable_cb(self, msg: Int16) -> None:
         assert msg.data in (0, 1)
         self.enabled = bool(msg.data)
 
@@ -56,18 +57,18 @@ class SharedController(ControllerBase):
         self.sorted_goals = sorted(self.goal_beliefs.items(), key=lambda x: x[1], reverse=True)
 
     @property
-    def confidence(self):
+    def confidence(self) -> float | None:
         if len(self.sorted_goals) == 0:
             return None
-        if len(self.sorted_goals) < 2:
+        if len(self.sorted_goals) == 1:
             return self.sorted_goals[0][1]
         return self.sorted_goals[0][1] - self.sorted_goals[1][1]
 
     @property
-    def current_goal(self):
+    def current_goal(self) -> int | None:
         return None if len(self.sorted_goals) == 0 else self.sorted_goals[0][0]
 
-    def auto_step(self):
+    def auto_step(self) -> np.ndarray:
         goal_id = self.current_goal
         if goal_id is None:
             return np.zeros(8)
@@ -79,10 +80,12 @@ class SharedController(ControllerBase):
         q_dot = J_pinv @ err[:3]
         return self.clamp_qd(q_dot) if self.clamp else q_dot
 
-    def combine(self, ur):
+    def combine(self, ur: np.ndarray) -> np.ndarray:
+        # stop move if human input is zero and we are not using confidence
         if (not self.use_confidence) and np.linalg.norm(self.uh) <= 0:
             return np.zeros(ur.shape)
 
+        # constraints
         constraint_joints = [i for i in range(8) if self.uh[i] != 0]
         if self.constraint == "soft":
             ur[constraint_joints] = np.clip(
@@ -91,21 +94,22 @@ class SharedController(ControllerBase):
         elif self.constraint == "hard":
             ur[constraint_joints] = np.zeros(len(constraint_joints))
 
+        # combine
         if not self.use_confidence:
             return ur + self.uh
-
         if self.confidence is None:
             return self.uh
-
         rospy.loginfo_throttle(
             0.5, f"goal: {self.current_goal}, confidence: {self.confidence:.3f}\r"
         )
         return self.confidence * ur + self.uh
 
     @override
-    def step(self):
-        if self.enabled:
+    def step(self) -> None:
+        if not self.enabled:
+            # return human input if da is disabled
             self._vel_cmder.pub_vel(self.uh)
+            return
         ur = self.auto_step()
         q_dot = self.combine(ur)
         self._vel_cmder.pub_vel(q_dot)
@@ -114,7 +118,11 @@ class SharedController(ControllerBase):
 if __name__ == "__main__":
     rospy.init_node("shared_controller")
     ctrler = SharedController(
-        da_enable_topic="/da", fixed_joints=(1, 7), constraint="soft", use_cofidence=True
+        uh_topic="/teleop_velocity_command",
+        da_enable_topic="/da",
+        fixed_joints=(1, 7),
+        constraint="soft",
+        use_confidence=True,
     )
     r = rospy.Rate(30)
 
