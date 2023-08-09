@@ -57,26 +57,23 @@ class SharedController(ControllerBase):
 
     @property
     def confidence(self):
+        if len(self.sorted_goals) == 0:
+            return None
         if len(self.sorted_goals) < 2:
             return self.sorted_goals[0][1]
         return self.sorted_goals[0][1] - self.sorted_goals[1][1]
 
     @property
     def current_goal(self):
-        if len(self.sorted_goals) == 0:
-            raise ValueError("No goal belief received")
-        return self.sorted_goals[0][0]
+        return None if len(self.sorted_goals) == 0 else self.sorted_goals[0][0]
 
     def auto_step(self):
+        goal_id = self.current_goal
+        if goal_id is None:
+            return np.zeros(8)
         dur, q = self._jnt_state_listener.get_state()
-        if self.constraint == "hard":
-            fixed_joints = self.fixed_joints | {i for i in range(8) if self.uh[i] != 0}
-            J_pinv = self._ik_solver.solve_J_pinv(q, fixed_joints=fixed_joints, only_trans=True)
-        else:
-            J_pinv = self._ik_solver.solve_J_pinv(
-                q, fixed_joints=self.fixed_joints, only_trans=True
-            )
-        err = self.get_err(target_frame=f"goal{self.current_goal}")
+        J_pinv = self._ik_solver.solve_J_pinv(q, fixed_joints=self.fixed_joints, only_trans=True)
+        err = self.get_err(target_frame=f"goal{goal_id}")
         if err is None:
             return np.zeros(8)
         q_dot = J_pinv @ err[:3]
@@ -86,18 +83,24 @@ class SharedController(ControllerBase):
         if (not self.use_confidence) and np.linalg.norm(self.uh) <= 0:
             return np.zeros(ur.shape)
 
+        constraint_joints = [i for i in range(8) if self.uh[i] != 0]
         if self.constraint == "soft":
-            # clip the joint velocity where uh is not 0
-            if soft_joints := [i for i in range(8) if self.uh[i] != 0]:
-                ur[soft_joints] = np.clip(ur[soft_joints], -self.soft_max_vel, self.soft_max_vel)
-
-        if self.use_confidence:
-            rospy.loginfo_throttle(
-                0.5, f"goal: {self.current_goal}, confidence: {self.confidence:.3f}\r"
+            ur[constraint_joints] = np.clip(
+                ur[constraint_joints], -self.soft_max_vel, self.soft_max_vel
             )
-            return self.confidence * ur + self.uh
-        else:
+        elif self.constraint == "hard":
+            ur[constraint_joints] = np.zeros(len(constraint_joints))
+
+        if not self.use_confidence:
             return ur + self.uh
+
+        if self.confidence is None:
+            return self.uh
+
+        rospy.loginfo_throttle(
+            0.5, f"goal: {self.current_goal}, confidence: {self.confidence:.3f}\r"
+        )
+        return self.confidence * ur + self.uh
 
     @override
     def step(self):
@@ -111,10 +114,9 @@ class SharedController(ControllerBase):
 if __name__ == "__main__":
     rospy.init_node("shared_controller")
     ctrler = SharedController(
-        da_enable_topic="/da", fixed_joints=(), constraint="soft", use_cofidence=True
+        da_enable_topic="/da", fixed_joints=(1, 7), constraint="soft", use_cofidence=True
     )
     r = rospy.Rate(30)
-    rospy.sleep(0.5)
 
     with suppress(rospy.ROSInterruptException):
         while not rospy.is_shutdown():
