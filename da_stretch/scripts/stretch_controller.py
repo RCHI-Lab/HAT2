@@ -7,6 +7,7 @@ import rospy
 from geometry_msgs.msg import Twist, Vector3
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64, Float64MultiArray
+from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
 
 
 class StretchController(hm.HelloNode):
@@ -19,6 +20,7 @@ class StretchController(hm.HelloNode):
             "joint_arm": 0,
             "joint_wrist_yaw": 0,
         }
+        self.gripper = 0.0
 
     def joint_cb(self, msg: Float64MultiArray) -> None:
         q_dot = msg.data
@@ -42,15 +44,23 @@ class StretchController(hm.HelloNode):
             return_before_done=True,
         )
 
-    def gripper_cb(self, msg: Float64):
+    def open_gripper(self, request: EmptyRequest) -> EmptyResponse:
+        # self.move_to_pose(
+        #     {"joint_gripper_finger_left": self.gripper_range[1]}, return_before_done=True
+        # )
+        self.gripper = self.gripper_range[1]
+        rospy.logwarn("gripper opened")
+        return EmptyResponse()
+
+    def gripper_cb(self, msg: Float64) -> None:
         # divide or multiply by some scaling factor that you can find through testing
-        gripper_delta = msg.data * 0.005
+        gripper_delta = msg.data * 0.003
         self.gripper += gripper_delta
         self.gripper = hm.bound_ros_command(
             self.gripper_range, self.gripper, fail_out_of_range_goal=False
         )
 
-    def main(self):
+    def main(self) -> None:
         hm.HelloNode.main(
             self, "stretch_controller", "stretch_controller", wait_for_first_pointcloud=False
         )
@@ -63,6 +73,8 @@ class StretchController(hm.HelloNode):
         rospy.Subscriber("stretch_controller/gripper_cmd", Float64, self.gripper_cb, queue_size=1)
         self.base_vel_pub = rospy.Publisher("stretch/cmd_vel", Twist, queue_size=1)
         rospy.logdebug("stretch controller started")
+
+        rospy.Service("stretch_controller/open_gripper", Empty, self.open_gripper)
 
         rate = rospy.Rate(10)
 

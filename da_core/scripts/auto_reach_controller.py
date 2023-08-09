@@ -7,7 +7,6 @@ import rospy
 from controller_base import ControllerBase
 from joint_state_listener import JointStateListener
 from stretch_ik_solver import IKSolver
-from typing_extensions import override
 
 
 class AutoReachController(ControllerBase):
@@ -19,7 +18,6 @@ class AutoReachController(ControllerBase):
         self.clamp = clamp
         self.max_speed = max_speed
 
-    @override
     def step(self):
         dur, q = self._jnt_state_listener.get_state()
         J_pinv = self._ik_solver.solve_J_pinv(q, fixed_joints=self.fixed_joints, only_trans=True)

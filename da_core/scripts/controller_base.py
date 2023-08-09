@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+from ast import Not
 from typing import Sequence
 
 import numpy as np
@@ -25,6 +26,7 @@ class ControllerBase(abc.ABC):
             rospy.Subscriber(uh_topic, Float64MultiArray, self.uh_cb)
             self.uh = np.zeros(8)
         rospy.on_shutdown(self.stop)
+        self.max_speed = None
 
     def clamp_qd(self, q_dot: np.ndarray) -> np.ndarray:
         if self.max_speed is None:
@@ -43,7 +45,7 @@ class ControllerBase(abc.ABC):
 
     @abc.abstractmethod
     def step(self):
-        pass
+        raise NotImplementedError()
 
     # TODO refactor, function to get both target and ee position
     def get_err(self, target_frame="goal", base_frame="base_link") -> np.ndarray | None:

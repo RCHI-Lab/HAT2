@@ -10,11 +10,11 @@ import rospy
 from controller_base import ControllerBase
 from joint_state_listener import JointStateListener
 from stretch_ik_solver import IKSolver
-from typing_extensions import override
 
 # isort: split
 from da_core.msg import GoalBelief, GoalBeliefArray
 from std_msgs.msg import Int16
+from std_srvs.srv import Empty
 
 
 class SharedController(ControllerBase):
@@ -22,7 +22,8 @@ class SharedController(ControllerBase):
         self,
         uh_topic: str,
         da_enable_topic: str,
-        fixed_joints: Sequence[int],
+        ik_fixed_joints: Sequence[int],
+        fixed_joints: list[int],
         constraint: Literal["hard", "soft", "none"] = "none",
         clamp=False,
         max_speed=0.5,
@@ -32,7 +33,8 @@ class SharedController(ControllerBase):
         super().__init__(uh_topic)
         self._ik_solver = IKSolver()
         self._jnt_state_listener = JointStateListener()
-        self.fixed_joints = set(fixed_joints)
+        self.ik_fixed_joints = set(ik_fixed_joints)
+        self.fixed_joints = fixed_joints
         self.constraint = constraint
         self.clamp = clamp
         self.max_speed = max_speed
@@ -45,10 +47,17 @@ class SharedController(ControllerBase):
         if rospy.get_param("interface") == "hat":
             self.enable_sub = rospy.Subscriber(da_enable_topic, Int16, self.da_enable_cb)
             self.enabled = False
+            rospy.wait_for_service("stretch_controller/open_gripper")
 
     def da_enable_cb(self, msg: Int16) -> None:
         assert msg.data in (0, 1)
         self.enabled = bool(msg.data)
+        if self.enabled:
+            try:
+                open_gripper = rospy.ServiceProxy("stretch_controller/open_gripper", Empty)
+                open_gripper()
+            except rospy.ServiceException as e:
+                print(f"Service call failed: {e}")
 
     def goal_beliefs_cb(self, msg: GoalBeliefArray) -> None:
         goal: GoalBelief
@@ -73,7 +82,7 @@ class SharedController(ControllerBase):
         if goal_id is None:
             return np.zeros(8)
         dur, q = self._jnt_state_listener.get_state()
-        J_pinv = self._ik_solver.solve_J_pinv(q, fixed_joints=self.fixed_joints, only_trans=True)
+        J_pinv = self._ik_solver.solve_J_pinv(q, fixed_joints=self.ik_fixed_joints, only_trans=True)
         err = self.get_err(target_frame=f"goal{goal_id}")
         if err is None:
             return np.zeros(8)
@@ -94,6 +103,8 @@ class SharedController(ControllerBase):
         elif self.constraint == "hard":
             ur[constraint_joints] = np.zeros(len(constraint_joints))
 
+        ur[self.fixed_joints] = np.zeros(len(self.fixed_joints))
+
         # combine
         if not self.use_confidence:
             return ur + self.uh
@@ -104,13 +115,14 @@ class SharedController(ControllerBase):
         )
         return self.confidence * ur + self.uh
 
-    @override
     def step(self) -> None:
         if not self.enabled:
             # return human input if da is disabled
             self._vel_cmder.pub_vel(self.uh)
             return
         ur = self.auto_step()
+        ur /= 1
+        ur[[3, 4, 5, 6]] /= 5
         q_dot = self.combine(ur)
         self._vel_cmder.pub_vel(q_dot)
 
@@ -120,7 +132,8 @@ if __name__ == "__main__":
     ctrler = SharedController(
         uh_topic="/teleop_velocity_command",
         da_enable_topic="/da",
-        fixed_joints=(1, 7),
+        ik_fixed_joints=(0, 7),
+        fixed_joints=[0, 7],
         constraint="soft",
         use_confidence=True,
     )
