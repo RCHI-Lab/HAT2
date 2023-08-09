@@ -9,8 +9,6 @@
     <include file="$(find stretch_core)/launch/stretch_driver.launch" pass_all_args="true">
         <arg name="mode" value="$(arg mode)" />
     </include>
-    <node pkg="rosservice" type="rosservice" name="set_stretch_driver_log_level"
-        args="call --wait /stretch_driver/set_logger_level ros 'warn'" />
     <!-- -->
 
     <group if="$(arg lidar)">

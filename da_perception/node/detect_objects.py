@@ -20,7 +20,3 @@ if __name__ == "__main__":
     topic_base_name = "detections"
     node = DetectionNode(detector, default_marker_name, node_name, topic_base_name)
     node.main()
-    try:
-        rospy.spin()
-    except KeyboardInterrupt:
-        print("interrupt received, so shutting down")

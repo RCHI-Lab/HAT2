@@ -1,3 +1,4 @@
+from __future__ import annotations
 import abc
 
 import rospy
@@ -14,8 +15,8 @@ class GoalPublisherBase(abc.ABC):
         self.tf_br = tf2_ros.StaticTransformBroadcaster()
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
-        self.tf_list = []
-        self.goal_ids = []
+        self.tf_list: list[TransformStamped] = []
+        self.goal_ids: list[int] = []
         self.tf_prefix = tf_prefix
 
     def clear(self):
@@ -27,8 +28,8 @@ class GoalPublisherBase(abc.ABC):
         self.goal_pub.publish(UInt32MultiArray(data=self.goal_ids))
 
     def get_tf(self, detection: dict, timestamp, id: int):
+        assert (rospy.Time().now() - timestamp).to_sec() < 10
         box_3d = detection["box_3d"]
-        rospy.logwarn(box_3d["center_xyz"])
         if box_3d is None:
             # return immediately because ros messages has default values if arg is None
             return None

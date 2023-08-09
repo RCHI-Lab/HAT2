@@ -28,9 +28,7 @@ class DetectionNode:
         modify_3d_detections=None,
     ):
         self.rgb_image = None
-        self.rgb_image_timestamp = None
         self.depth_image = None
-        self.depth_image_timestamp = None
         self.camera_info = None
         self.all_points = []
         self.publish_marker_point_clouds = True
@@ -52,14 +50,27 @@ class DetectionNode:
             self.depth_image = self.bridge.imgmsg_to_cv2(ros_depth_image, "passthrough")
         except CvBridgeError as e:
             print(e)
-        self.rgb_image_timestamp = ros_rgb_image.header.stamp
-        self.depth_image_timestamp = ros_depth_image.header.stamp
         self.camera_info = rgb_camera_info
         self.image_count = self.image_count + 1
+        self.rgb_image_timestamp = ros_rgb_image.header.stamp
+        self.depth_image_timestamp = ros_depth_image.header.stamp
 
+    def update(self):
+        if self.rgb_image is None or self.depth_image is None or self.camera_info is None:
+            rospy.loginfo_throttle(1, "Waiting for image data...")
+            return
+        rospy.loginfo(
+            f"enter update delay: {(rospy.Time().now() - self.rgb_image_timestamp).to_sec()}"
+        )
+        rgb_image = self.rgb_image.copy()
+        depth_image = self.depth_image.copy()
+        camera_info = self.camera_info
+        rgb_image_timestamp = self.rgb_image_timestamp
+        depth_image_timestamp = self.depth_image_timestamp
+        rospy.loginfo(f"after copy: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
         # Copy the depth image to avoid a change to the depth image
         # during the update.
-        time_diff = self.rgb_image_timestamp - self.depth_image_timestamp
+        time_diff = rgb_image_timestamp - depth_image_timestamp
         time_diff = abs(time_diff.to_sec())
         if time_diff > 0.0001:
             print("WARNING: The rgb image and the depth image were not taken at the same time.")
@@ -68,71 +79,38 @@ class DetectionNode:
         # Rotate the image by 90deg to account for camera
         # orientation. In the future, this may be performed at the
         # image source.
-        detection_box_image = cv2.rotate(self.rgb_image, cv2.ROTATE_90_CLOCKWISE)
+        detection_box_image = cv2.rotate(rgb_image, cv2.ROTATE_90_CLOCKWISE)
 
-        debug_input = False
-        if debug_input:
-            print("DetectionNode.image_callback: received an image!")
-            print(
-                "DetectionNode.image_callback: detection_box_image.shape =",
-                detection_box_image.shape,
-            )
-            cv2.imwrite(
-                "./output_images/deep_learning_input_" + str(self.image_count).zfill(4) + ".png",
-                detection_box_image,
-            )
-
-        debug_output = False
+        draw_output = False
         center_crop = True
         detections_2d, output_image = self.detector.apply_to_image(
-            detection_box_image, draw_output=debug_output, crop=center_crop
+            detection_box_image, draw_output, crop=center_crop
         )
         for detection in detections_2d:
             rospy.loginfo(f"{detection['label']} detected, score: {detection['confidence']:.3f}")
-
-        if debug_output:
-            print("DetectionNode.image_callback: processed image with deep network!")
-            print("DetectionNode.image_callback: output_image.shape =", output_image.shape)
-            cv2.imwrite(
-                "./output_images/deep_learning_output_" + str(self.image_count).zfill(4) + ".png",
-                output_image,
-            )
+        rospy.logwarn(f"after 2d: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
 
         detections_3d = detections_2d_to_3d(
             detections_2d,
-            self.rgb_image,
-            self.camera_info,
-            self.depth_image,
+            rgb_image,
+            camera_info,
+            depth_image,
             min_box_side_m=self.min_box_side_m,
             max_box_side_m=self.max_box_side_m,
         )
+        rospy.logwarn(f"after 3d: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
 
         if self.modify_3d_detections is not None:
             detections_3d = self.modify_3d_detections(detections_3d)
 
-        self.marker_collection.update(detections_3d, self.rgb_image_timestamp)
-        self.goal_publisher.update(detections_3d, self.rgb_image_timestamp)
+        self.marker_collection.update(detections_3d, rgb_image_timestamp)
+        self.goal_publisher.update(detections_3d, rgb_image_timestamp)
 
         marker_array = self.marker_collection.get_ros_marker_array()
-        include_axes = True
-        include_z_axes = False
-        axes_array = None
-        axes_scale = 4.0
-        if include_axes or include_z_axes:
-            axes_array = self.marker_collection.get_ros_axes_array(
-                include_z_axes, include_axes, axes_scale=axes_scale
-            )
-
-        if self.publish_marker_point_clouds:
-            for marker in self.marker_collection:
-                marker_points = marker.get_marker_point_cloud()
-                self.add_point_array_to_point_cloud(marker_points)
-            self.publish_point_cloud()
         self.visualize_markers_pub.publish(marker_array)
-        if axes_array is not None:
-            self.visualize_axes_pub.publish(axes_array)
 
         self.publish_beliefs(detections_2d)
+        rospy.logwarn(f"process delay: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
 
     def add_to_point_cloud(self, x_mat, y_mat, z_mat, mask):
         points = [
@@ -212,3 +190,8 @@ class DetectionNode:
         self.goal_beliefs_pub = rospy.Publisher(
             f"/{self.topic_base_name}/goal_beliefs", GoalBeliefArray, queue_size=1
         )
+
+        rate = rospy.Rate(0.25)
+        while not rospy.is_shutdown():
+            self.update()
+            rate.sleep()
