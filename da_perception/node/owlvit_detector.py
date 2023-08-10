@@ -4,9 +4,7 @@ from transformers import OwlViTForObjectDetection, OwlViTProcessor
 
 
 class OwlViTObjectDetector:
-    def __init__(self, queries=None, score_threshold=0.08):
-        if queries is None:
-            queries = ["red cup", "blue cup", "green cup", "pink cup"]
+    def __init__(self, queries, score_threshold=0.08):
         self.queries = queries
         self.score_threshold = score_threshold
         self.model = OwlViTForObjectDetection.from_pretrained("google/owlvit-base-patch32")

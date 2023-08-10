@@ -22,6 +22,7 @@
     </include>
 
     <!-- OBJECT DETECTOR -->
+    <rosparam command="load" file="$(find da_perception)/config/queries.yaml" />
     <node name="object_detector" pkg="da_perception" type="detect_objects.py" output="screen">
         <param name="debug_directory" type="string" value="$(env HELLO_FLEET_PATH)/debug/" />
     </node>

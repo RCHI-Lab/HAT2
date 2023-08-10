@@ -59,7 +59,7 @@ class DetectionNode:
         if self.rgb_image is None or self.depth_image is None or self.camera_info is None:
             rospy.loginfo_throttle(1, "Waiting for image data...")
             return
-        rospy.loginfo(
+        rospy.logdebug(
             f"enter update delay: {(rospy.Time().now() - self.rgb_image_timestamp).to_sec()}"
         )
         rgb_image = self.rgb_image.copy()
@@ -88,7 +88,7 @@ class DetectionNode:
         )
         for detection in detections_2d:
             rospy.loginfo(f"{detection['label']} detected, score: {detection['confidence']:.3f}")
-        rospy.logwarn(f"after 2d: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
+        rospy.logdebug(f"after 2d: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
 
         detections_3d = detections_2d_to_3d(
             detections_2d,
@@ -98,7 +98,7 @@ class DetectionNode:
             min_box_side_m=self.min_box_side_m,
             max_box_side_m=self.max_box_side_m,
         )
-        rospy.logwarn(f"after 3d: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
+        rospy.logdebug(f"after 3d: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
 
         if self.modify_3d_detections is not None:
             detections_3d = self.modify_3d_detections(detections_3d)
@@ -110,7 +110,7 @@ class DetectionNode:
         self.visualize_markers_pub.publish(marker_array)
 
         self.publish_beliefs(detections_2d)
-        rospy.logwarn(f"process delay: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
+        rospy.loginfo(f"process delay: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
 
     def add_to_point_cloud(self, x_mat, y_mat, z_mat, mask):
         points = [
