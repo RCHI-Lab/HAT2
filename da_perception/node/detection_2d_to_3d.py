@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
-from numba_image_to_pointcloud import numba_image_to_pointcloud
+from image_to_pointcloud import image_to_pointcloud
 from scipy.spatial.transform import Rotation
 
 
@@ -190,7 +190,7 @@ def detections_2d_to_3d(
             head_to_camera_mat = counterclockwise_rotate_mat
 
             if box_2d is not None:
-                points_3d = numba_image_to_pointcloud(depth_image, box_2d, camera_matrix)
+                points_3d = image_to_pointcloud(depth_image, box_2d, camera_matrix)
                 if (min_box_side_m is not None) and (max_box_side_m is not None):
                     points_3d = filter_points(
                         points_3d, camera_matrix, box_2d, min_box_side_m, max_box_side_m
