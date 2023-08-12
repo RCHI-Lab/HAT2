@@ -67,7 +67,7 @@ class DetectionNode:
         camera_info = self.camera_info
         rgb_image_timestamp = self.rgb_image_timestamp
         depth_image_timestamp = self.depth_image_timestamp
-        rospy.loginfo(f"after copy: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
+        rospy.logdebug(f"after copy: {(rospy.Time().now() - rgb_image_timestamp).to_sec()}")
         # Copy the depth image to avoid a change to the depth image
         # during the update.
         time_diff = rgb_image_timestamp - depth_image_timestamp

@@ -52,6 +52,7 @@ class SharedController(ControllerBase):
     def da_enable_cb(self, msg: Int16) -> None:
         assert msg.data in (0, 1)
         self.enabled = bool(msg.data)
+        # open gripper if enabled
         if self.enabled:
             try:
                 open_gripper = rospy.ServiceProxy("stretch_controller/open_gripper", Empty)
@@ -60,6 +61,9 @@ class SharedController(ControllerBase):
                 print(f"Service call failed: {e}")
 
     def goal_beliefs_cb(self, msg: GoalBeliefArray) -> None:
+        # return if msg.goals is empty
+        if len(msg.goals) == 0:
+            return
         goal: GoalBelief
         for goal in msg.goals:
             self.goal_beliefs[goal.id] = goal.belief
@@ -133,7 +137,7 @@ if __name__ == "__main__":
         uh_topic="/teleop_velocity_command",
         da_enable_topic="/da",
         ik_fixed_joints=(0, 7),
-        fixed_joints=[0, 7],
+        fixed_joints=[0, 3, 4, 5, 6, 7],
         constraint="soft",
         use_confidence=True,
     )

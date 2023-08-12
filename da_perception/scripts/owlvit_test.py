@@ -1,6 +1,5 @@
-#!/home/hat/da_ws/src/driver_assistance/da_perception/.venv/bin/python3
+#!/usr/bin/env python3
 
-import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
