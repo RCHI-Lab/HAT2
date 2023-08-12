@@ -1,6 +1,10 @@
 <launch>
     <arg name="interface" default="keyboard" />
 
+    <arg name="task_name" default="current_task" />
+    <node name="record_angles" pkg="rosbag" type="record" output="screen"
+        args="-o /home/hat/Desktop/data/hat_data_$(arg task_name).bag /rpy_filtered /state /mouse /velocities /da" />
+
     <param name="/use_real_robot" type="bool" value="true" />
 
     <node name="shared_controller" pkg="da_core" type="shared_controller.py" />
