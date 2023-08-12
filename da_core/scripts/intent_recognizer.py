@@ -9,10 +9,9 @@ from math import sqrt
 import numpy as np
 import rospy
 import tf2_ros
+from da_core.msg import GoalBelief, GoalBeliefArray
 from geometry_msgs.msg import Vector3
 from std_msgs.msg import Float64MultiArray, UInt32MultiArray
-
-from da_core.msg import GoalBelief, GoalBeliefArray
 
 
 class IntentRecognizer(abc.ABC):
@@ -89,7 +88,7 @@ class DistanceIR(IntentRecognizer):
         self._goal_beliefs[id] = 1 / (1 + 5 * dist)
 
 
-class IgnoreFarIR(IntentRecognizer):
+class IgnoreFarDeleteGraspIR(IntentRecognizer):
     def calculate_single_belief(self, id: int) -> None:
         if id not in self._goal_beliefs:
             raise ValueError(f"goal id {id} not found")
@@ -102,7 +101,7 @@ class IgnoreFarIR(IntentRecognizer):
 
 if __name__ == "__main__":
     rospy.init_node("intent_recognizer")
-    ir = IgnoreFarIR("/goal_ids")
+    ir = IgnoreFarDeleteGraspIR("/goal_ids")
     r = rospy.Rate(30)
     with suppress(rospy.ROSInterruptException):
         while not rospy.is_shutdown():
