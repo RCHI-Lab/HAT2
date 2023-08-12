@@ -1,13 +1,9 @@
 import numpy as np
-from numba import njit
 
 
-@njit(fastmath=True)
-def numba_image_to_pointcloud(depth_image, bounding_box, camera_matrix):
+def image_to_pointcloud(depth_image, bounding_box, camera_matrix):
     x_min, y_min, x_max, y_max = bounding_box
-    h, w = depth_image.shape
-
-    # check and correct the bounding box to be within the rgb_image
+    h, w = depth_image.shape[:2]
     x_min = int(round(max(0, x_min)))
     y_min = int(round(max(0, y_min)))
     x_max = int(round(min(w - 1, x_max)))
@@ -19,21 +15,8 @@ def numba_image_to_pointcloud(depth_image, bounding_box, camera_matrix):
     f_y = camera_matrix[1, 1]
     c_y = camera_matrix[1, 2]
 
-    out_w = (x_max - x_min) + 1
-    out_h = (y_max - y_min) + 1
-    points = np.empty((out_h * out_w, 3), dtype=np.float32)
-
-    i = 0
-    x = x_min
-    while x <= x_max:
-        y = y_min
-        while y <= y_max:
-            z_3d = depth_image[y, x] / 1000.0
-            x_3d = ((x - c_x) / f_x) * z_3d
-            y_3d = ((y - c_y) / f_y) * z_3d
-            points[i] = (x_3d, y_3d, z_3d)
-            i += 1
-            y += 1
-        x += 1
-
-    return points
+    x, y = np.meshgrid(np.arange(x_min, x_max + 1), np.arange(y_min, y_max + 1))
+    z_3d = depth_image[y, x] / 1000.0
+    x_3d = ((x - c_x) / f_x) * z_3d
+    y_3d = ((y - c_y) / f_y) * z_3d
+    return np.column_stack((x_3d.ravel(), y_3d.ravel(), z_3d.ravel()))
