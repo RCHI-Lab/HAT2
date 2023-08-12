@@ -61,11 +61,11 @@ def bounding_box_2d_to_3d(points_array, box_2d, camera_matrix, head_to_camera_ma
     detection_box_width_pix = y1 - y0
     detection_box_height_pix = x1 - x0
 
-    num_points = points_array.shape[0]
-    if num_points >= 1:
+    valid_points = points_array[points_array[:, 2] > 0]
+    num_valid_points = valid_points.shape[0]
+    if num_valid_points >= 100:
         # there's issue with the points being 0 (hollow)
-        points_z = points_array[:, 2]
-        box_depth = np.median(points_z[points_z > 0])
+        box_depth = np.median(valid_points[:, 2])
     else:
         print(
             "WARNING: No reasonable depth image points available in the detected rectangle. No work around currently implemented for lack of depth estimate."
@@ -202,15 +202,16 @@ def detections_2d_to_3d(
                     head_to_camera_mat=head_to_camera_mat,
                 )
 
-        detections_3d.append(
-            {
-                "id": h.get("id"),
-                "confidence": h.get("confidence"),
-                "box_3d": box_3d,
-                "box_2d": box_2d,
-                "label": label,
-                "points_3d": points_3d,
-            }
-        )
+        if box_3d is not None:
+            detections_3d.append(
+                {
+                    "id": h.get("id"),
+                    "confidence": h.get("confidence"),
+                    "box_3d": box_3d,
+                    "box_2d": box_2d,
+                    "label": label,
+                    "points_3d": points_3d,
+                }
+            )
 
     return detections_3d

@@ -12,7 +12,7 @@ from joint_state_listener import JointStateListener
 from stretch_ik_solver import IKSolver
 
 # isort: split
-from da_core.msg import GoalBelief, GoalBeliefArray
+from da_core.msg import GoalBeliefArray
 from std_msgs.msg import Int16
 from std_srvs.srv import Empty
 
@@ -40,7 +40,6 @@ class SharedController(ControllerBase):
         self.max_speed = max_speed
         self.soft_max_vel = soft_max_vel
         self.use_confidence = use_confidence
-        self.goal_beliefs: dict[int, float] = {}
         self.sorted_goals: list[tuple[int, float]] = []
         self.goal_sub = rospy.Subscriber("/goal_beliefs", GoalBeliefArray, self.goal_beliefs_cb)
         self.enabled = True
@@ -61,13 +60,10 @@ class SharedController(ControllerBase):
                 print(f"Service call failed: {e}")
 
     def goal_beliefs_cb(self, msg: GoalBeliefArray) -> None:
-        # return if msg.goals is empty
         if len(msg.goals) == 0:
-            return
-        goal: GoalBelief
-        for goal in msg.goals:
-            self.goal_beliefs[goal.id] = goal.belief
-        self.sorted_goals = sorted(self.goal_beliefs.items(), key=lambda x: x[1], reverse=True)
+            self.sorted_goals = []
+        goal_beliefs = {goal.id: goal.belief for goal in msg.goals}
+        self.sorted_goals = sorted(goal_beliefs.items(), key=lambda x: x[1], reverse=True)
 
     @property
     def confidence(self) -> float | None:
