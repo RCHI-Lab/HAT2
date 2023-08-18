@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import abc
+from math import sqrt
 
 import rospy
 import tf2_ros
@@ -27,17 +29,22 @@ class GoalPublisherBase(abc.ABC):
         self.tf_br.sendTransform(self.tf_list)
         self.goal_pub.publish(UInt32MultiArray(data=self.goal_ids))
 
-    def get_tf(self, detection: dict, timestamp, id: int):
-        assert (rospy.Time().now() - timestamp).to_sec() < 10
+    def get_point_camera(self, detection: dict, timestamp):
         box_3d = detection["box_3d"]
         if box_3d is None:
             # return immediately because ros messages has default values if arg is None
             return None
         center = box_3d["center_xyz"]
-        point_camera = PointStamped(
+        return PointStamped(
             header=Header(stamp=timestamp, frame_id="camera_color_optical_frame"),
             point=Point(x=center[0], y=center[1], z=center[2]),
         )
+
+    def get_tf(self, detection: dict, timestamp, id: int):
+        assert (rospy.Time().now() - timestamp).to_sec() < 10
+        point_camera = self.get_point_camera(detection, timestamp)
+        if point_camera is None:
+            return None
         point_odom: PointStamped = self.tf_buffer.transform_full(
             point_camera, "odom", timestamp, "odom"
         )
@@ -53,6 +60,33 @@ class GoalPublisherBase(abc.ABC):
     @abc.abstractmethod
     def update(self, detections_3d: list, timestamp):
         raise NotImplementedError()
+
+
+class NearSingleGoalPublisher(GoalPublisherBase):
+    def __init__(self, goal_topic="/goal_ids", tf_prefix="goal") -> None:
+        super().__init__(goal_topic, tf_prefix)
+
+    def update(self, detections_3d: list, timestamp):
+        """Publish goal_ids and tf for the detection with highest confidence"""
+        self.clear()
+        if not detections_3d:
+            return
+        sorted_detections = sorted(detections_3d, key=lambda x: x["confidence"], reverse=True)
+
+        # publish the goal with highest confidence and within a distance threshold
+        for d in sorted_detections:
+            trans = self.get_point_camera(d, timestamp).point
+            dist = sqrt(trans.x**2 + trans.y**2 + trans.z**2)
+            rospy.loginfo(f"dist: {dist}")
+            if dist < 2:
+                tf = self.get_tf(d, timestamp, 0)
+                if tf is None:
+                    continue
+                self.tf_list.append(tf)
+                self.goal_ids.append(0)
+                break
+
+        self.publish()
 
 
 class SingleGoalPublisher(GoalPublisherBase):

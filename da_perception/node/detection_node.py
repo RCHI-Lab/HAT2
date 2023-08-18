@@ -9,7 +9,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from da_core.msg import GoalBelief, GoalBeliefArray
 from detection_2d_to_3d import detections_2d_to_3d
 from detection_ros_markers import DetectionBoxMarkerCollection
-from goal_publisher import SingleGoalPublisher
+from goal_publisher import SingleGoalPublisher, NearSingleGoalPublisher
 from sensor_msgs import point_cloud2
 from sensor_msgs.msg import CameraInfo, Image, PointCloud2, PointField
 from std_msgs.msg import Header
@@ -159,7 +159,7 @@ class DetectionNode:
         name = rospy.get_name()
         rospy.loginfo("{0} started".format(name))
 
-        self.goal_publisher = SingleGoalPublisher()
+        self.goal_publisher = NearSingleGoalPublisher()
 
         self.rgb_topic_name = "/camera/color/image_raw"  #'/camera/infra1/image_rect_raw'
         self.rgb_image_subscriber = message_filters.Subscriber(self.rgb_topic_name, Image)
