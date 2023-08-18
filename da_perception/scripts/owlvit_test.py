@@ -21,9 +21,16 @@ model = model.to(device)
 model.eval()
 
 # Sample image
+'''
 image = Image.open(
     "/home/hat/da_ws/src/driver_assistance/da_perception/images/cup_turn.png"
 ).convert("RGB")
+'''
+
+image = Image.open(
+    "/home/hello-akhil/catkin_ws/src/driver_assistance/da_perception/images/cup_turn.png"
+).convert("RGB")
+
 
 # Text queries to search the image for
 text_queries = ["red cup", "white cup"]

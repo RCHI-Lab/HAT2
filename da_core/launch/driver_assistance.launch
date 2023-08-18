@@ -3,7 +3,7 @@
 
     <arg name="task_name" default="current_task" />
     <node name="record_angles" pkg="rosbag" type="record" output="screen"
-        args="-o /home/hat/Desktop/data/hat_data_$(arg task_name).bag /rpy_filtered /state /mouse /velocities /da" />
+        args="-o /home/hello-akhil/Desktop/data/hat_data_$(arg task_name).bag /rpy_filtered /state /mouse /velocities /da" />
 
     <param name="/use_real_robot" type="bool" value="true" />
 
