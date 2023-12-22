@@ -1,0 +1,16 @@
+<launch>
+    <arg name="lidar" default="true" />
+
+    <param name="/use_real_robot" type="bool" value="true" />
+
+    <node name="auto_reach_controller" pkg="da_core" type="auto_reach_controller.py" />
+    <node name="single_goal_manager" pkg="da_sim" type="single_goal_manager.py" />
+
+    <node name="stretch_controller" pkg="da_stretch" type="stretch_controller.py"
+        output="screen" />
+
+    <include file="$(find da_stretch)/launch/stretch_bringup.launch">
+        <arg name="lidar" value="$(arg lidar)" />
+    </include>
+
+</launch>

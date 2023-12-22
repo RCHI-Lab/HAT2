@@ -1,0 +1,183 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<robot name="stretch">
+  <link name="link_gripper">
+    <inertial>
+      <origin xyz="-0.0170229132730066 0.0131410320934285 -0.0371614759484659" rpy="0.0 0.0 0.0"/>
+      <mass value="0.101902711393094"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+  </link>
+  <link name="link_grasp_center">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+      <mass value="1.0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+  <link name="base_link">
+    <inertial>
+      <origin xyz="-0.11587 0.0019426 0.093621" rpy="0.0 0.0 0.0"/>
+      <mass value="1.1912"/>
+      <inertia ixx="0.0034667" ixy="-5.0568e-06" ixz="0.00042861" iyy="0.0052744" iyz="-5.766e-05" izz="0.0047945"/>
+    </inertial>
+  </link>
+  <link name="link_mast">
+    <inertial>
+      <origin xyz="2.0817e-17 0.7075 -2.7756e-17" rpy="0.0 0.0 0.0"/>
+      <mass value="1.8285"/>
+      <inertia ixx="0.0709854511954588" ixy="-0.00433428742758457" ixz="-0.000186110788697573" iyy="0.000437922053342648" iyz="-0.00288788257713431" izz="0.071104808501661"/>
+    </inertial>
+  </link>
+  <link name="link_lift">
+    <inertial>
+      <origin xyz="-0.031727 0.038403 0.013361" rpy="0.0 0.0 0.0"/>
+      <mass value="0.27218"/>
+      <inertia ixx="0.00052571" ixy="0.00014899" ixz="-1.9258e-05" iyy="0.00030679" iyz="-6.2451e-06" izz="0.00037324"/>
+    </inertial>
+  </link>
+  <link name="link_arm_l4">
+    <inertial>
+      <origin xyz="-1.0146e-06 -1.9719e-05 -0.094738" rpy="0.0 0.0 0.0"/>
+      <mass value="0.068095"/>
+      <inertia ixx="0.0001256" ixy="-5.6914e-12" ixz="6.0647e-09" iyy="0.0001256" iyz="1.1787e-07" izz="1.1091e-10"/>
+    </inertial>
+  </link>
+  <link name="link_arm_l3">
+    <inertial>
+      <origin xyz="-5.13853606326845e-07 -1.99844969271112e-05 -0.0971104963726614" rpy="0.0 0.0 0.0"/>
+      <mass value="0.0628927381893134"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+  </link>
+  <link name="link_arm_l2">
+    <inertial>
+      <origin xyz="-5.17421949435687e-07 -2.02045301450349e-05 -0.0968815475684904" rpy="0.0 0.0 0.0"/>
+      <mass value="0.0571386353275368"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+  </link>
+  <link name="link_arm_l1">
+    <inertial>
+      <origin xyz="-5.257e-07 -2.0482e-05 -0.096543" rpy="0.0 0.0 0.0"/>
+      <mass value="0.051382"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+  </link>
+  <link name="link_arm_l0">
+    <inertial>
+      <origin xyz="0.0270582141286185 -0.00189876414654466 -0.0377809018481181" rpy="0.0 0.0 0.0"/>
+      <mass value="0.085003260946398"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+  </link>
+  <link name="link_wrist_yaw">
+    <inertial>
+      <origin xyz="2.20122392535771e-11 2.9317167880849e-05 -0.018966592644729" rpy="0.0 0.0 0.0"/>
+      <mass value="0.0404746907425003"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+  </link>
+  <link name="link_base_translation">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+      <mass value="1.0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+  <link name="link_base_revolution">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+      <mass value="1.0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+  <joint name="joint_gripper" type="fixed">
+    <parent link="link_wrist_yaw"/>
+    <child link="link_gripper"/>
+    <axis xyz="1. 0. 0."/>
+    <origin xyz="0.0 0.0 0.0" rpy="3.14159 0.0 -1.5708"/>
+  </joint>
+  <joint name="joint_grasp_center" type="fixed">
+    <parent link="link_gripper"/>
+    <child link="link_grasp_center"/>
+    <axis xyz="1. 0. 0."/>
+    <origin xyz="-0.205478 0.0 -0.138154" rpy="0.0 0.0 3.141579"/>
+  </joint>
+  <joint name="joint_mast" type="fixed">
+    <parent link="link_base_revolution"/>
+    <child link="link_mast"/>
+    <axis xyz="1. 0. 0."/>
+    <origin xyz="-0.07009055762807098 0.13159786057784964 0.028302116135615125" rpy="1.5648678330247587 0.013954114010035212 -0.02346559894719587"/>
+  </joint>
+  <joint name="joint_lift" type="prismatic">
+    <limit effort="100.0" velocity="1.0" lower="0.0" upper="1.1"/>
+    <parent link="link_mast"/>
+    <child link="link_lift"/>
+    <axis xyz="0. 0. 1."/>
+    <origin xyz="-0.037385 0.1666 0.0" rpy="1.5707926535897934 1.5707926535755432 -3.141592653589793"/>
+  </joint>
+  <joint name="joint_arm_l4" type="fixed">
+    <parent link="link_lift"/>
+    <child link="link_arm_l4"/>
+    <axis xyz="1. 0. 0."/>
+    <origin xyz="-0.251582752247285 -0.006070296440143875 -0.005254623139652845" rpy="1.5664162057374356 0.059620207701978734 -1.5661623604639134"/>
+  </joint>
+  <joint name="joint_arm_l3" type="prismatic">
+    <limit effort="100.0" velocity="1.0" lower="0.0" upper="0.13"/>
+    <parent link="link_arm_l4"/>
+    <child link="link_arm_l3"/>
+    <axis xyz="0. 0. 1."/>
+    <origin xyz="0.0 0.0 0.013" rpy="7.68831233799385e-30 2.36716479416092e-30 2.29652732251143e-17"/>
+  </joint>
+  <joint name="joint_arm_l2" type="prismatic">
+    <limit effort="100.0" velocity="1.0" lower="0.0" upper="0.13"/>
+    <parent link="link_arm_l3"/>
+    <child link="link_arm_l2"/>
+    <axis xyz="0. 0. 1."/>
+    <origin xyz="0.0 0.0 0.013" rpy="0.0 1.57655765344625e-30 -1.66533453693773e-16"/>
+  </joint>
+  <joint name="joint_arm_l1" type="prismatic">
+    <limit effort="100.0" velocity="1.0" lower="0.0" upper="0.13"/>
+    <parent link="link_arm_l2"/>
+    <child link="link_arm_l1"/>
+    <axis xyz="0. 0. 1."/>
+    <origin xyz="0.0 0.0 0.0129999999999981" rpy="-7.63746778746202e-30 -7.88860905221012e-31 1.11022302462516e-16"/>
+  </joint>
+  <joint name="joint_arm_l0" type="prismatic">
+    <limit effort="100.0" velocity="1.0" lower="0.0" upper="0.13"/>
+    <parent link="link_arm_l1"/>
+    <child link="link_arm_l0"/>
+    <axis xyz="0. 0. 1."/>
+    <origin xyz="0.0 0.0 -0.0137499999991968" rpy="7.63746778746202e-30 -3.80121128864402e-15 2.62707547767438e-15"/>
+  </joint>
+  <joint name="joint_wrist_yaw" type="revolute">
+    <limit effort="100.0" velocity="1.0" lower="-1.75" upper="4.0"/>
+    <parent link="link_arm_l0"/>
+    <child link="link_wrist_yaw"/>
+    <axis xyz=" 0.  0. -1."/>
+    <origin xyz="0.0830000000000654 -0.0307500000000129 0.0" rpy="1.5708 4.2595e-14 2.6415e-15"/>
+  </joint>
+  <joint name="joint_base_translation" type="prismatic">
+    <limit effort="100.0" velocity="1.0" lower="-3.0" upper="3.0"/>
+    <parent link="base_link"/>
+    <child link="link_base_translation"/>
+    <axis xyz="1. 0. 0."/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+  </joint>
+  <joint name="joint_base_revolution" type="revolute">
+    <limit effort="100.0" velocity="1.0" lower="-3.0" upper="3.0"/>
+    <parent link="link_base_translation"/>
+    <child link="link_base_revolution"/>
+    <axis xyz="0. 0. 1."/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+  </joint>
+  <material name="aluminum">
+    <color rgba="0.5 0.5 0.5 1. "/>
+  </material>
+  <material name="plastic">
+    <color rgba="0.1 0.1 0.1 1. "/>
+  </material>
+  <material name="">
+    <color rgba="0.79215686 0.81960784 0.93333333 1.        "/>
+  </material>
+</robot>
