@@ -1,0 +1,28 @@
+<launch>
+
+    <arg name="debug_directory" value="$(env HELLO_FLEET_PATH)/debug/" />
+
+    <include file="$(find da_stretch)/launch/stretch_bringup.launch">
+        <arg name="mode" value="position" />
+        <arg name="lidar" value="true" />
+        <arg name="realsense" value="true" />
+    </include>
+
+    <!-- OBJECT DETECTOR -->
+    <rosparam command="load" file="$(find da_perception)/config/queries.yaml" />
+    <node name="object_detector" pkg="da_perception" type="detect_objects.py" output="screen">
+        <param name="debug_directory" type="string" value="$(arg debug_directory)" />
+    </node>
+    <!-- -->
+
+    <!-- KEYBOARD TELEOP -->
+    <node name="keyboard_teleop" pkg="stretch_core" type="keyboard_teleop" output="screen" />
+    <!-- -->
+
+    <!-- VISUALIZE DETECTION -->
+    <node name="rviz" pkg="rviz" type="rviz" output="screen"
+        args="-d $(find da_perception)/rviz/object_detection.rviz" />
+    <!-- -->
+
+</launch>
+  

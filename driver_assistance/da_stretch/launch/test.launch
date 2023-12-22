@@ -1,0 +1,25 @@
+<launch>
+    <arg name="interface" default="keyboard" />
+    <arg name="lidar" default="false" />
+
+    <arg name="task_name" default="current_task" />
+    <node name="record_angles" pkg="rosbag" type="record" output="screen"
+        args="-o /home/hello-akhil/Desktop/data/hat_data_$(arg task_name).bag /rpy_filtered /state /mouse /velocities /da" />
+
+    <param name="/use_real_robot" type="bool" value="true" />
+
+    <node name="teleop_controller" pkg="da_core" type="teleop_controller.py" respawn="true"
+        output="screen" />
+    
+    <include file="$(find da_interface)/launch/interface.launch">
+        <arg name="interface" value="$(arg interface)" />
+    </include>
+<!-->
+    <node name="stretch_controller" pkg="da_stretch" type="stretch_controller.py"
+        output="screen" />
+
+    <include file="$(find da_stretch)/launch/stretch_bringup.launch">
+        <arg name="lidar" value="$(arg lidar)" />
+    </include>-->
+
+</launch>

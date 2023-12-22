@@ -1,0 +1,4 @@
+<launch>
+    <node name="auto_reach_controller" pkg="da_core" type="auto_reach_controller.py" />
+    <node name="single_goal_manager" pkg="da_sim" type="single_goal_manager.py" />
+</launch>

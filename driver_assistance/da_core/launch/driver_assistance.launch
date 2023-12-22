@@ -1,0 +1,38 @@
+<launch>
+    <arg name="interface" default="keyboard" />
+
+    <arg name="task_name" default="current_task" />
+    <node name="record_angles" pkg="rosbag" type="record" output="screen"
+        args="-o /home/hello-akhil/Desktop/data/hat_data_$(arg task_name).bag /rpy_filtered /state /mouse /velocities /da" />
+
+    <param name="/use_real_robot" type="bool" value="true" />
+
+    <node name="shared_controller" pkg="da_core" type="shared_controller.py" />
+
+    <node name="stretch_controller" pkg="da_stretch" type="stretch_controller.py"
+        output="screen" />
+
+    <node name="intent_recognizer" pkg="da_core" type="intent_recognizer.py" />
+
+    <!-- CONTROL INTERFACE -->
+    <include file="$(find da_interface)/launch/interface.launch">
+        <arg name="interface" value="$(arg interface)" />
+    </include>
+
+    <!-- STRETCH -->
+    <include file="$(find da_stretch)/launch/stretch_bringup.launch">
+        <arg name="lidar" value="true" />
+        <arg name="realsense" value="true" />
+    </include>
+
+    <!-- OBJECT DETECTOR -->
+    <rosparam command="load" file="$(find da_perception)/config/queries.yaml" />
+    <node name="object_detector" pkg="da_perception" type="detect_objects.py" output="screen">
+        <param name="debug_directory" type="string" value="$(env HELLO_FLEET_PATH)/debug/" />
+    </node>
+
+    <!-- VISUALIZATION -->
+    <node name="rviz" pkg="rviz" type="rviz" output="screen"
+        args="-d $(find da_perception)/rviz/object_detection.rviz" />
+
+</launch>
