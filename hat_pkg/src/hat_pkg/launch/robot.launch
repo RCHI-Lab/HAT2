@@ -1,0 +1,5 @@
+<launch>
+  <node name="velocity_command" pkg="hat_pkg" type="velocity_command.py" output="screen"/>
+  <node name="mouse_publisher_node" pkg="hat_pkg" type="mouse_publisher_upgraded.py" output="screen"/>
+  <node name="gui" pkg="hat_pkg" type="gui_upgraded.py" output="screen"/>
+</launch>

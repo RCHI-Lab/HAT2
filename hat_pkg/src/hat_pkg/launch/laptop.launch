@@ -1,0 +1,13 @@
+<launch>
+  <node name="hat_publisher" pkg="hat_pkg" type="hat_publisher.py" output="screen"/>
+  
+  <node name="robot_control" pkg="hat_pkg" type="robot_control_upgraded.py" output="screen"/>
+
+  <node name="state_machine" pkg="hat_pkg" type="state_machine.py" output="screen"/>
+  <node name="cursor_control" pkg="hat_pkg" type="cursor_control_upgraded.py" output="screen"/>
+  <node name="audio" pkg="hat_pkg" type="audio.py" output="screen"/>
+  <?ignore
+   <node name="mouse_publisher" pkg="hat_pkg" type="mouse_publisher.py" output="screen"/>
+  ?>
+ 
+</launch>

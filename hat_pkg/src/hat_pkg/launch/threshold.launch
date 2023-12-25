@@ -1,0 +1,9 @@
+<launch>
+  <node name="hat_publisher" pkg="hat_pkg" type="hat_publisher.py" output="screen"/>
+  <node name="state_machine" pkg="hat_pkg" type="threshold_calibration_state_machine.py" output="screen"/>
+  <node name="mouse_publisher" pkg="hat_pkg" type="mouse_publisher.py" output="screen"/>
+  <node name="threshold_node" pkg="hat_pkg" type="threshold_calibration.py" output="screen"/>
+  <?ignore
+
+  ?>
+</launch>
