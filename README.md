@@ -1,2 +1,2 @@
-# HAT2
-Code for paper: "Independence in the Home: A Wearable Interface for a Person with Quadriplegia to Teleoperate a Mobile Manipulator" Authors: Akhil Padmanabha, Janavi Gupta, Chen Chen, Jehan Yang, Vy Nguyen, Doug Weber, Carmel Majidi, Zackory Erickson
+# Independence in the Home: A Wearable Interface for a Person with Quadriplegia to Teleoperate a Mobile Manipulator
+Code for paper: [Independence in the Home: A Wearable Interface for a Person with Quadriplegia to Teleoperate a Mobile Manipulator](https://arxiv.org/abs/2312.15071) Authors: Akhil Padmanabha, Janavi Gupta, Chen Chen, Jehan Yang, Vy Nguyen, Doug Weber, Carmel Majidi, Zackory Erickson
