@@ -18,7 +18,7 @@ Follow the [HAT Package README](https://github.com/RCHI-Lab/HAT2/blob/main/hat_p
 ### Driver Assistance Installation
 Follow the [Driver Assistance README](https://github.com/RCHI-Lab/HAT2/blob/main/driver_assistance/README.md)
 ### On Arduino Nano
-Upload the [nano master calibration][https://github.com/RCHI-Lab/HAT2/blob/main/nano_master_calibration/nano_master_calibration.ino] file to both the Arduino Nano's.
+Upload the [nano master calibration](https://github.com/RCHI-Lab/HAT2/blob/main/nano_master_calibration/nano_master_calibration.ino) file to both the Arduino Nano's.
 ## Conduct Experiment
 ![System Overview](https://github.com/RCHI-Lab/HAT2/assets/79553848/7744c84c-7158-4908-a336-cee5a52e92c3)
 ### Setting threshold values
