@@ -21,7 +21,7 @@
   pip3 install time
   pip3 install glob
   pip3 install tkinter
-  pip3 install cv2
+  pip3 install opencv-python
   pip3 install pillow
   ```
 * Make the workspace
